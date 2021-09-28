@@ -7,11 +7,12 @@ CAB432 Assignment 2 (Semester 2, 2021)
 
 <br>
 
+---
 ## **Progresses**
 
 #### Break
-- Create github repo
-- Discuss
+- [ ] Create github repo
+- [ ] Discuss idea
 
 #### Week 10: 
 - [ ] Basic project idea:
@@ -23,7 +24,7 @@ CAB432 Assignment 2 (Semester 2, 2021)
 - [ ] Feedback from tutors
 	
 #### Week 11:
-- [ ] 
+- [ ] tbd 
 
 
 #### Week 12

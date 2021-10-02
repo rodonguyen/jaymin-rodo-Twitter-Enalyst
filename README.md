@@ -11,7 +11,7 @@ CAB432 Assignment 2 (Semester 2, 2021)
 ## **Progresses**
 
 #### Break
-- [ ] Create github repo
+- [x] Create github repo
 - [ ] Discuss idea
 
 #### Week 10: 

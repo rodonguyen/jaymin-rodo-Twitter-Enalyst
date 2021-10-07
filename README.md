@@ -4,9 +4,6 @@ CAB432 Assignment 2 (Semester 2, 2021)
 
 <br>
 
-## Project details
-- 
-
 
 
 ---
@@ -19,9 +16,9 @@ CAB432 Assignment 2 (Semester 2, 2021)
 | x     | Discuss Idea       | Decided to do Twitter |
 
 | Week 10 + 11 | (4-17 Oct)                           |     |
-| ------------ | ------------------------------------ | --- | Most parts are identical to Sheep's
-| .            | Basic project idea: <br> - Purpose, description <br> - API use, use cases <br> - Outline desired architecture: Scaling and Persistence choice  | S
-| .            | Allocate tasks | As of week 10, Minh will handle more on Front-End side. Both will work on Back-End but Rodo should try to contribute more to compensate for lack of contribution in Front-End
+| ------------ | ------------------------------------ | --- |
+| .            | Basic project idea: <br> - Purpose, description <br> - API use, use cases <br> - Outline desired architecture: Scaling and Persistence choice  |  Most parts are identical to Sheep's |
+| .            | Allocate tasks | As of week 10, Minh will handle more on Front-End side. Both will work on Back-End but Rodo should try to contribute more to compensate for lack of contribution in Front-End |
 | .            | Research Architecture and draw one **(Both - Sat 9/10)** |
 | .            | Finish proposal **(Rodo Thursday night 7/10)** | 
 | .            | Agree on the sprint plan    | OK

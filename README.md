@@ -17,12 +17,12 @@ CAB432 Assignment 2 (Semester 2, 2021)
 
 | Week 10 + 11 | (4-17 Oct)                           |     |
 | ------------ | ------------------------------------ | --- |
-| .            | Basic project idea: <br> - Purpose, description <br> - API use, use cases <br> - Outline desired architecture: Scaling and Persistence choice  |  Most parts are identical to Sheep's |
-| .            | Allocate tasks | As of week 10, Minh will handle more on Front-End side. Both will work on Back-End but Rodo should try to contribute more to compensate for lack of contribution in Front-End |
-| .            | Research Architecture and draw one **(Both - Sat 9/10)** |
-| .            | Finish proposal **(Rodo Thursday night 7/10)** | 
-| .            | Agree on the sprint plan    | OK
-| .            | Choose weekly meeting time  | Sat 10.00-12.00
+| x            | Basic project idea: <br> - Purpose, description <br> - API use, use cases <br> - Outline desired architecture: Scaling and Persistence choice  |  Most parts are identical to Sheep's |
+| x            | Allocate tasks | As discussed on the 9/10 meeting, each person is assigned with parts they're good at. Minh will handle more on Front-End side and coding. Rodo will contribute more on the report |
+| x            | Research Architecture and draw one **(Both - Sat 9/10)** | Done in Proposal
+| x            | Finish proposal **(Rodo Thursday night 7/10)** | 
+| x            | Agree on the sprint plan    | OK
+| x            | Choose weekly meeting time  | Sat 10.00-12.00
 | .            | Get feedback from tutors    |
 
 | Week 12 | (18 Oct)                                                                                                               |     |

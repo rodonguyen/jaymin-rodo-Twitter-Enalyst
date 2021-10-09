@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Twitter = require('twitter');
+const Twitter = require('twitter-v2');
  
 require('dotenv');
 

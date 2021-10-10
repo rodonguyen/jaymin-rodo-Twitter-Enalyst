@@ -18,7 +18,7 @@ const SearchBar = () => {
       return;
     }
 
-    setKeyword(input);
+    setKeyword({ input });
     console.log(keyword);
   };
   return (

@@ -12,7 +12,9 @@ export default function Tweets() {
 
   useEffect(() => {
     console.log(keyword);
-    socket.emit("search", keyword);
+    if (keyword.input) {
+      socket.emit("search", keyword.input);
+    }
   }, [keyword]);
 
   return <></>;

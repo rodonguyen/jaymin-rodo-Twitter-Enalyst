@@ -56,7 +56,7 @@ const connections = [];
 
 io.on("connection", (socket) => {
   socket.emit("your id", socket.id);
-
+  connections.push(socket);
   console.log(
     "%s Connected. %s sockets connected",
     socket.id,
@@ -76,29 +76,26 @@ io.on("connection", (socket) => {
       track: payload,
       language: "en",
     });
-
-    stream.on("data", function (tweet) {
-      console.log(tweet.text);
+    stream.on("data", (tweet) => {
+      console.log("streamed");
       // if (tweet.timestamp_ms - lastTimestamp > speedLimiter) {
       // lastTimestamp = Date.now();
 
       // Send Tweet Object to Client
-      socket.emit("sendTweet", {
-        tweet: sentiment.getSentiment(tweet, socket),
-      });
-
-      socket.once("disconnect", () => {
-        connections.splice(connections.indexOf(socket), 1);
-        socket.disconnect();
-        stream.stop();
-        console.log(
-          "Socket disconnected: %s sockets remaining",
-          connections.length
-        );
-      });
-      // }
+      // socket.emit("sendTweet", {
+      //   tweet: sentiment.getSentiment(tweet, socket),
+      // });
     });
-
+    clientStream = stream;
+    socket.on("disconnect", () => {
+      connections.splice(connections.indexOf(socket), 1);
+      socket.disconnect();
+      clientStream.destroy();
+      console.log(
+        "Socket disconnected: %s sockets remaining",
+        connections.length
+      );
+    });
     stream.on("error", function (message) {
       console.log("Ooops! Error: " + message);
     });

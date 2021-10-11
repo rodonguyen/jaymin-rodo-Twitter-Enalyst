@@ -1,6 +1,5 @@
-import React, { useEffect, useContext, useCallback, useRef } from "react";
+import React, { useEffect, useContext } from "react";
 import io from "socket.io-client";
-import axios from "axios";
 
 import { TweetContext } from "../Context/TweetContext";
 
@@ -14,6 +13,9 @@ export default function Tweets() {
     console.log(keyword);
     if (keyword.input) {
       socket.emit("search", keyword.input);
+      socket.on("sendTweet", (receivedTweet) => {
+        console.log(receivedTweet);
+      });
     }
   }, [keyword]);
 

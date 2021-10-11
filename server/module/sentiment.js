@@ -1,24 +1,26 @@
 const Sentiment = require("sentiment");
 
-var sentiment = {};
+var sentiment = new Sentiment();
 
 //Send Tweet Text to Sentiment Analysis
-sentiment.getSentiment = (tweet, socket) => {
-  var sentimentScore = Sentiment(tweet.text);
+sentiment.getSentiment = (tweet) => {
+  const sentimentScore = sentiment.analyze(tweet.text);
+
+  console.log("score", sentimentScore);
 
   if (sentimentScore.score < 0) {
-    sentimentScore = "negative";
+    score = "negative";
   } else if (sentimentScore.score > 0) {
-    sentimentScore = "positive";
+    score = "positive";
   } else {
-    sentimentScore = "neutral";
+    score = "neutral";
   }
 
-  return sentiment.appendSentiment(tweet, sentimentScore, socket);
+  return sentiment.appendSentiment(tweet, score);
 };
 
 //Send sentiment score of tweet to Client
-sentiment.appendSentiment = (tweet, sentiment, socket) => {
+sentiment.appendSentiment = (tweet, sentiment) => {
   var scoreTweet = {
     sentiment: sentiment,
     created_at: tweet.created_at,
@@ -32,7 +34,6 @@ sentiment.appendSentiment = (tweet, sentiment, socket) => {
       time_zone: tweet.user.time_zone,
     },
     text: tweet.text,
-    lang: tweet.lang,
   };
 
   console.log(scoreTweet.text);

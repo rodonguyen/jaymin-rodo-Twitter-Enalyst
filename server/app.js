@@ -22,7 +22,7 @@ const io = socketio(server, {
     methods: ["GET", "POST"],
   },
 });
-
+process.setMaxListeners(0);
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
@@ -63,66 +63,67 @@ io.on("connection", (socket) => {
     connections.length
   );
 
-  // const prevSearch = false;
+  var prevSearch = false;
 
   socket.on("search", (payload) => {
     console.log("Keyword: %s", payload);
 
-    const lastTimestamp = Date.now(),
-      speedLimiter = 800; //800ms
+    // if (prevSearch) {
+    //   clientStream.destroy();
+    //   console.log(prevSearch);
+    //   console.log("stop stream");
+    // } else {
+    //   prevSearch = true;
+    // }
+
     console.log("New Twitter Stream!");
+
     // Start the stream with tracking the keyword
     stream = clientTwitter.stream("statuses/filter", {
       track: payload,
       language: "en",
     });
+
+    var lastTimestamp = Date.now(),
+      speedLimiter = 800; //800ms
+    console.log(lastTimestamp, speedLimiter);
     stream.on("data", (tweet) => {
       console.log("streamed");
       // if (tweet.timestamp_ms - lastTimestamp > speedLimiter) {
-      // lastTimestamp = Date.now();
+      lastTimestamp = Date.now();
+      // console.log("tweet", tweet);
+      //Send Tweet Object to Client
 
-      // Send Tweet Object to Client
-      // socket.emit("sendTweet", {
-      //   tweet: sentiment.getSentiment(tweet, socket),
-      // });
-    });
-    clientStream = stream;
-    socket.on("disconnect", () => {
-      connections.splice(connections.indexOf(socket), 1);
-      socket.disconnect();
-      clientStream.destroy();
-      console.log(
-        "Socket disconnected: %s sockets remaining",
-        connections.length
-      );
-    });
-    stream.on("error", function (message) {
-      console.log("Ooops! Error: " + message);
-    });
-    stream.on("limit", function (message) {
-      ok;
-      console.log("Limit Reached: " + message);
-    });
+      socket.emit("sendTweet", {
+        tweet: sentiment.getSentiment(tweet),
+      });
+      console.log("Tweet sent");
 
-    stream.on("disconnect", function (message) {
-      console.log("Ooops! Disconnected: " + message);
+      clientStream = stream;
+
+      socket.on("disconnect", () => {
+        connections.splice(connections.indexOf(socket), 1);
+        socket.disconnect();
+        clientStream.destroy();
+        console.log(
+          "Socket disconnected: %s sockets remaining",
+          connections.length
+        );
+      });
+
+      stream.on("error", function (message) {
+        console.log("Ooops! Error: " + message);
+      });
+
+      stream.on("limit", function (message) {
+        ok;
+        console.log("Limit Reached: " + message);
+      });
+
+      stream.on("disconnect", function (message) {
+        console.log("Ooops! Disconnected: " + message);
+      });
     });
-
-    // var lastTimestamp = Date.now(),
-    //   speedLimiter = 800; //800ms
-
-    //Turn on Twitter Stream
-    // twitterStream.on("tweet", (tweet) => {
-    //   console.log(tweet.text);
-    //   if (tweet.timestamp_ms - lastTimestamp > speedLimiter) {
-    //     lastTimestamp = Date.now();
-
-    //     // Send Tweet Object to Client
-    //     socket.emit("sendTweet", {
-    //       tweet: sentiment.getSentiment(tweet, socket),
-    //     });
-    //   }
-    // });
   });
 }); //END io.sockets.on
 

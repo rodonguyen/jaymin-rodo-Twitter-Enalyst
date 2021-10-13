@@ -66,42 +66,28 @@ io.on("connection", (socket) => {
   var prevSearch = false;
 
   socket.on("search", (payload) => {
-    console.log("Keyword: %s", payload);
-
-    // if (prevSearch) {
-    //   clientStream.destroy();
-    //   console.log(prevSearch);
-    //   console.log("stop stream");
-    // } else {
-    //   prevSearch = true;
-    // }
+    const keyword = payload.keyword;
+    const timer = payload.timer * 1000;
+    console.log("Keyword: %s %s", keyword, timer);
 
     console.log("New Twitter Stream!");
 
     // Start the stream with tracking the keyword
     stream = clientTwitter.stream("statuses/filter", {
-      track: payload,
+      track: keyword,
       language: "en",
     });
-
-    var lastTimestamp = Date.now(),
-      speedLimiter = 800; //800ms
-    console.log(lastTimestamp, speedLimiter);
+    var counter = 0;
+    var prevTimestamp = Date.now();
     stream.on("data", (tweet) => {
+      counter = counter + 1;
       console.log("streamed");
-      // if (tweet.timestamp_ms - lastTimestamp > speedLimiter) {
-      lastTimestamp = Date.now();
-      // console.log("tweet", tweet);
-      //Send Tweet Object to Client
-
-      socket.emit("sendTweet", {
-        tweet: sentiment.getSentiment(tweet),
-      });
-      console.log("Tweet sent");
-
       clientStream = stream;
-
-      socket.on("disconnect", () => {
+      timeStamp = Date.now();
+      console.log("timer:", prevTimestamp + timer);
+      console.log("timer:", timeStamp);
+      //Send Tweet Object to Client
+      if (timeStamp > prevTimestamp + timer) {
         connections.splice(connections.indexOf(socket), 1);
         socket.disconnect();
         clientStream.destroy();
@@ -109,20 +95,36 @@ io.on("connection", (socket) => {
           "Socket disconnected: %s sockets remaining",
           connections.length
         );
-      });
+        console.log(counter);
+      } else {
+        socket.emit("sendTweet", {
+          tweet: sentiment.getSentiment(tweet),
+        });
+        console.log("Tweet sent");
 
-      stream.on("error", function (message) {
-        console.log("Ooops! Error: " + message);
-      });
+        socket.on("disconnect", () => {
+          connections.splice(connections.indexOf(socket), 1);
+          socket.disconnect();
+          clientStream.destroy();
+          console.log(
+            "Socket disconnected: %s sockets remaining",
+            connections.length
+          );
+        });
 
-      stream.on("limit", function (message) {
-        ok;
-        console.log("Limit Reached: " + message);
-      });
+        stream.on("error", function (message) {
+          console.log("Ooops! Error: " + message);
+        });
 
-      stream.on("disconnect", function (message) {
-        console.log("Ooops! Disconnected: " + message);
-      });
+        stream.on("limit", function (message) {
+          ok;
+          console.log("Limit Reached: " + message);
+        });
+
+        stream.on("disconnect", function (message) {
+          console.log("Ooops! Disconnected: " + message);
+        });
+      }
     });
   });
 }); //END io.sockets.on

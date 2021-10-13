@@ -25,12 +25,23 @@ export default makeStyles((theme) => ({
   },
   inputRoot: {
     color: "inherit",
+    marginTop: "15px",
   },
   inputSearch: {
     padding: theme.spacing(1, 1, 1, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
     transition: theme.transitions.create("width"),
-    width: "100%",
+    width: "100paper%",
     [theme.breakpoints.up("md")]: { width: "20ch" },
+  },
+  box: {
+    marginTop: "200px",
+  },
+  paper: {
+    marginTop: "140px",
+    height: "70%",
+  },
+  button: {
+    marginBottom: "5px",
   },
 }));

@@ -7,12 +7,13 @@ const ENDPOINT = "http://localhost:3000/";
 const socket = io(ENDPOINT, {});
 
 export default function Tweets() {
-  const { keyword, setKeyword } = useContext(TweetContext);
-
+  const { keyword, streamTime } = useContext(TweetContext);
+  const path = { keyword: keyword.input, timer: streamTime.timerStream };
+  console.log(path);
   useEffect(() => {
     console.log(keyword);
     if (keyword.input) {
-      socket.emit("search", keyword.input);
+      socket.emit("search", path);
       socket.on("sendTweet", (receivedTweet) => {
         console.log(receivedTweet);
       });

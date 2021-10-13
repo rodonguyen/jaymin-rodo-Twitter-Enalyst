@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 
-import { InputBase, Box, Button } from "@material-ui/core";
+import { Paper, InputBase, Box, Button } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import useStyles from "./styles.js";
 
@@ -22,19 +22,26 @@ const SearchBar = () => {
     console.log(keyword);
   };
   return (
-    <Box display="flex">
-      <div className={classes.search}>
-        <div className={classes.searchIcon}></div>
-        <InputBase
-          placeholder="Search keyword..."
-          classes={{ root: classes.inputRoot, input: classes.inputSearch }}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <Button variant="contained" onClick={inputSearch}>
-          <SearchIcon />
-        </Button>
-      </div>
-    </Box>
+    <div className="search-section">
+      <Box display="flex" className={classes.box}>
+        <Paper className={classes.paper}>
+          <div className={classes.search}>
+            <InputBase
+              placeholder="Search keyword..."
+              classes={{ root: classes.inputRoot, input: classes.inputSearch }}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            <Button
+              variant="contained"
+              className={classes.button}
+              onClick={inputSearch}
+            >
+              <SearchIcon />
+            </Button>
+          </div>
+        </Paper>
+      </Box>
+    </div>
   );
 };
 

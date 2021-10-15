@@ -22,6 +22,7 @@ CAB432 Assignment 2 (Semester 2, 2021)
 | x            | Agree on the sprint plan    | OK
 | x            | Choose weekly meeting time  | Sat 10.00-12.00
 | x            | Get feedback from tutors    |
+| .            | Meeting notes<br> abc |
 
 | Week 12 | (Starts on 18 Oct)                                                                                        |     |
 | ------- | ---------------------------------------------------------------------------------------------------------------------- | --- |

@@ -52,7 +52,7 @@ CAB432 Assignment 2 (Semester 2, 2021)
 ---
 
 ### Meeting notes 16/10/2021
-Some notes of the current progress:   
+Current progress:   
 - Socket: server constantly query twitter post, analyze sentiment score and socket the result back to the client   
 - Flow: search word - chart 1: give sentiment score for each post found, can add "View twitter post when hovering", chart 2: summary result from chart 1 result, chart 3: sentiment scores for the past time range of choice.  
 - Trending: in progress
@@ -61,12 +61,12 @@ Questions / Action points:
 - Ask Huy / tutor:   
   - If using Twitter streaming: what does DB+Redis store
   - Architecture impact from using streaming or searching (Micheal)? - Rodo  
-  - Scaling policy (Micheal)? - Rodo  
+  - Scaling policy (Micheal)? - Trials and errors? 
 - With the changes in features today, will it be 'enough load'? :  
     DB to store queried keyword results in the past. We add a new feature "Analysis of 1000 random posts for the past 24h/ 7 days", this feature utilizes the Search endpoint.    
+    Redis to store results of searched words from clients on the instances
 - Does Twitter Search have 'Time from ... to ...' parameter? - Rodo  
 - Sentiment and Natural, NLTK functions difference? Research  
-- Redis to store what??
   
 
 

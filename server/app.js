@@ -63,8 +63,6 @@ io.on("connection", (socket) => {
     connections.length
   );
 
-  var prevSearch = false;
-
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
     const timer = payload.timer * 1000;
@@ -79,6 +77,7 @@ io.on("connection", (socket) => {
     });
     var counter = 0;
     var prevTimestamp = Date.now();
+
     stream.on("data", (tweet) => {
       counter = counter + 1;
       console.log("streamed");
@@ -86,7 +85,7 @@ io.on("connection", (socket) => {
       timeStamp = Date.now();
       console.log("timer:", prevTimestamp + timer);
       console.log("timer:", timeStamp);
-      //Send Tweet Object to Client
+      // Send Tweet Object to Client
       if (timeStamp > prevTimestamp + timer) {
         connections.splice(connections.indexOf(socket), 1);
         socket.disconnect();

@@ -7,53 +7,128 @@
 .webmadewell {
   background-color: white;
 }
-body {
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
   margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
 }
-.sample-header {
-  position: fixed;
-  left: 0;
-  top: 1;
-  width: 100%;
-  background-image: url("https://miro.medium.com/max/1000/1*vp1M37AGMOFwCvLxVm62IA.jpeg");
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
 }
-.sample-header::before {
+body {
+  line-height: 1;
+}
+ol,
+ul {
+  list-style: none;
+}
+blockquote,
+q {
+  quotes: none;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
   content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  opacity: 0.3;
+  content: none;
 }
-.sample-header-section {
-  position: relative;
-  padding: 10% 0 10%;
-  max-width: 640px;
-  margin-top: 100px;
-  margin-left: auto;
-  margin-right: auto;
-  color: white;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
-  font-family: "Montserrat", sans-serif;
-}
-h1 {
-  font-weight: 500;
-}
-h2 {
-  font-weight: 400;
-}
-.sample-section-wrap {
-  position: relative;
-  /* background-color: white; */
-}
-.sample-section {
-  position: relative;
-  max-width: 640px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 40px;
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
 }

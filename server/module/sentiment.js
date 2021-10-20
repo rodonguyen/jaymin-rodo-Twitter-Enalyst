@@ -6,23 +6,23 @@ var sentiment = new Sentiment();
 sentiment.getSentiment = (tweet) => {
   const sentimentScore = sentiment.analyze(tweet.text);
 
-  console.log("score", sentimentScore);
-
-  if (sentimentScore.score < 0) {
+  numScore = sentimentScore.score;
+  if (numScore < 0) {
     score = "negative";
-  } else if (sentimentScore.score > 0) {
+  } else if (numScore > 0) {
     score = "positive";
   } else {
     score = "neutral";
   }
 
-  return sentiment.appendSentiment(tweet, score);
+  return sentiment.appendSentiment(tweet, score, numScore);
 };
 
 //Send sentiment score of tweet to Client
-sentiment.appendSentiment = (tweet, sentiment) => {
+sentiment.appendSentiment = (tweet, sentiment, numScore) => {
   var scoreTweet = {
     sentiment: sentiment,
+    num_score: numScore,
     created_at: tweet.created_at,
     timestamp_ms: tweet.timestamp_ms,
     id_str: tweet.id_str,

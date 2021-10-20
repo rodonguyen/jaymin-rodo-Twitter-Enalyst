@@ -21,12 +21,13 @@ import CardFooter from "../Card/CardFooter.js";
 import Button from "../CustomButtons/Button";
 import CustomInput from "../CustomInput/CustomInput";
 import { TweetContext } from "../../Context/TweetContext";
-
+import Tweet from "../Tweet/Tweets";
+import Chart from "../Chart/lineChart";
 import styles from "./searchStyles";
 
 const useStyles = makeStyles(styles);
 
-const timer = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const timer = [5, 10, 15, 20, 25, 30];
 
 export default function SectionLogin() {
   const classes = useStyles();
@@ -118,6 +119,9 @@ export default function SectionLogin() {
                   </Button>
                 </CardFooter>
               </form>
+            </Card>
+            <Card>
+              <Chart />
             </Card>
           </GridItem>
         </GridContainer>

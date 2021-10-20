@@ -8,10 +8,8 @@ import Grid from "@material-ui/core/Grid";
 
 const styles = {
   grid: {
-    justifyContent: "center",
-    alignContent: "center",
-    // marginRight: "-15px",
-    // padding: "0 200px 0 0px",
+    marginRight: "-15px",
+    marginLeft: "-15px",
     width: "auto",
   },
 };

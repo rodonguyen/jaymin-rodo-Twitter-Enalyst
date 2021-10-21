@@ -5,6 +5,7 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var http = require("http");
 var socketio = require("socket.io");
+var googleTrends = require("google-trends-api");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -52,8 +53,35 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-const connections = [];
+// const GetTrendingKeyword = function () {
+//   const trendingKeyword = [];
+//   googleTrends.realTimeTrends(
+//     {
+//       geo: "AU",
+//       category: "all",
+//     },
+//     function (err, results) {
+//       if (err) {
+//         console.log(err);
+//       } else {
+//         const trends = JSON.parse(results);
+//         trends.storySummaries.trendingStories.forEach((trend) => {
+//           const result = {};
+//           if (trend.entityNames.length >= 1) {
+//             trend.entityNames.forEach((keyword) => {
+//               keyword = keyword.split(" ").join("-");
+//               result.keyword = keyword;
+//               trendingKeyword.push(result);
+//             });
+//           }
+//         });
+//       }
+//     }
+//   );
+//   return trendingKeyword;
+// };
 
+const connections = [];
 io.on("connection", (socket) => {
   socket.emit("your id", socket.id);
   connections.push(socket);
@@ -62,7 +90,32 @@ io.on("connection", (socket) => {
     socket.id,
     connections.length
   );
-
+  // const trend = GetTrendingKeyword();
+  // console.log("trend", trend);
+  googleTrends.realTimeTrends(
+    {
+      geo: "AU",
+      category: "all",
+    },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+      } else {
+        const trends = JSON.parse(results);
+        trends.storySummaries.trendingStories.forEach((trend) => {
+          const result = {};
+          if (trend.entityNames.length >= 1) {
+            trend.entityNames.forEach((keyword) => {
+              keyword = keyword.split(" ").join("-");
+              result.keyword = keyword;
+              socket.emit("trending", result);
+              console.log("sent", trend);
+            });
+          }
+        });
+      }
+    }
+  );
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
     const timer = payload.timer * 1000;
@@ -88,8 +141,6 @@ io.on("connection", (socket) => {
       console.log("timer:", timeStamp);
       // Send Tweet Object to Client
       if (timeStamp > prevTimestamp + timer) {
-        connections.splice(connections.indexOf(socket), 1);
-        socket.disconnect();
         clientStream.destroy();
         console.log(
           "Socket disconnected: %s sockets remaining",

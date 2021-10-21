@@ -1,7 +1,6 @@
 import React, { useEffect, useContext } from "react";
 import io from "socket.io-client";
 import { makeStyles } from "@material-ui/core/styles";
-import Carousel from "react-slick";
 
 import styles from "./tweetStyles";
 import { TweetContext } from "../../Context/TweetContext";
@@ -27,51 +26,55 @@ const useStyles = makeStyles(styles);
 export default function Tweets() {
   const {
     keyword,
-    setKeyword,
     streamTime,
     setStreamTime,
-    timeStamp,
+    trendingKeyword,
     Tweet,
     setTweet,
     idTweet,
     setIdTweet,
     dataRef,
-    scoreRef,
+    scoreTweet,
+    setScoreTweet,
   } = useContext(TweetContext);
 
   const path = { keyword: keyword.input, timer: streamTime.timerStream };
 
   console.log("id", idTweet);
+  console.log("id", scoreTweet);
   useEffect(() => {
     const tweet = Tweet;
-    console.log(tweet);
     if (tweet.num_score !== undefined) {
       const now = Date.now();
       dataRef.current.push({ x: now, y: tweet.num_score });
-      scoreRef.current.push({ score: tweet.num_score });
-      setIdTweet((idTweet) => [...idTweet, tweet.id_str]);
+      setTimeout(() => {
+        setIdTweet((idTweet) => [...idTweet, tweet.id_str]);
+        setScoreTweet((scoreTweet) => [...scoreTweet, tweet.num_score]);
+      }, 7000);
     }
   }, [Tweet]);
 
   useEffect(() => {
     if (keyword.input) {
       socket.emit("search", path);
-      socket.on("sendTweet", (receivedTweet) => {
-        setTweet(receivedTweet.tweet);
-      });
+      setTimeout(
+        () =>
+          socket.on("sendTweet", (receivedTweet) => {
+            setTweet(receivedTweet.tweet);
+          }),
+        5000
+      );
     }
   }, [keyword]);
 
+  useEffect(() => {
+    socket.on("trending", (trendingKeyword) => {
+      console.log("trend", trendingKeyword);
+    });
+  }, [trendingKeyword]);
+
   const classes = useStyles();
 
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: false,
-  };
   return (
     <div className={classes.section}>
       <div className={classes.container}>
@@ -82,7 +85,9 @@ export default function Tweets() {
                 return <TweetEmbed id={id} placeholder={"loading"} />;
               })
             ) : (
-              <h1>search to display twitter post</h1>
+              <div className="tweet-header">
+                <h1>search to display twitter post</h1>
+              </div>
             )}
           </GridItem>
         </GridContainer>

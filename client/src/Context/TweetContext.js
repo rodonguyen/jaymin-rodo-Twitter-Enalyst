@@ -5,11 +5,11 @@ export const TweetContext = createContext();
 const TweetProvider = ({ children }) => {
   const [keyword, setKeyword] = useState({});
   const [streamTime, setStreamTime] = useState({});
-  const [timeStamp, setTimeStamp] = useState({});
+  const [trendingKeyword, setTrendingKeyword] = useState({});
   const [Tweet, setTweet] = useState({});
   const [idTweet, setIdTweet] = useState([]);
+  const [scoreTweet, setScoreTweet] = useState([]);
   const dataRef = useRef([]);
-  const scoreRef = useRef([]);
   // console.log(keyword);
   return (
     <TweetContext.Provider
@@ -18,14 +18,15 @@ const TweetProvider = ({ children }) => {
         setKeyword,
         streamTime,
         setStreamTime,
-        scoreRef,
-        timeStamp,
-        setTimeStamp,
+        setTrendingKeyword,
+        trendingKeyword,
         Tweet,
         setTweet,
         idTweet,
         setIdTweet,
         dataRef,
+        scoreTweet,
+        setScoreTweet,
       }}
     >
       {children}

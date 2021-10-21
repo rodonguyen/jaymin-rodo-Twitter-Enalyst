@@ -23,6 +23,7 @@ import CustomInput from "../CustomInput/CustomInput";
 import { TweetContext } from "../../Context/TweetContext";
 import Tweet from "../Tweet/Tweets";
 import Chart from "../Chart/lineChart";
+import TotalChart from "../Chart/TotalScoreChart";
 import styles from "./searchStyles";
 
 const useStyles = makeStyles(styles);
@@ -32,6 +33,7 @@ const timer = [5, 10, 15, 20, 25, 30];
 export default function SectionLogin() {
   const classes = useStyles();
   const [timerStream, getTimerStream] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const { keyword, setKeyword, streamTime, setStreamTime } =
     useContext(TweetContext);
   const [input, setInput] = useState();
@@ -40,8 +42,6 @@ export default function SectionLogin() {
     getTimerStream(event.target.value);
   };
   const inputSearch = () => {
-    console.log(input);
-
     if (!input) {
       console.log("!input");
       return;
@@ -51,6 +51,7 @@ export default function SectionLogin() {
     }
     setStreamTime({ timerStream });
     setKeyword({ input });
+    setLoaded(true);
     console.log(keyword);
     console.log(streamTime);
   };
@@ -93,16 +94,13 @@ export default function SectionLogin() {
                   <Select
                     labelId="timer-stream"
                     id="timer-stream"
+                    defaultValue={""}
                     value={timerStream}
                     input={<OutlinedInput label="timer" />}
                     onChange={handleChange}
                   >
-                    {timer.map((second) => (
-                      <MenuItem
-                        key={second}
-                        value={second}
-                        // style={getStyles(name, personName, theme)}
-                      >
+                    {timer?.map((second) => (
+                      <MenuItem key={second} value={second}>
                         {second}
                       </MenuItem>
                     ))}
@@ -120,9 +118,20 @@ export default function SectionLogin() {
                 </CardFooter>
               </form>
             </Card>
-            <Card>
-              <Chart />
-            </Card>
+            {loaded ? (
+              <div>
+                <Card>
+                  <Chart />
+                </Card>
+                <Card>
+                  <TotalChart />
+                </Card>
+              </div>
+            ) : (
+              <h1>
+                <Card>trending</Card>
+              </h1>
+            )}
           </GridItem>
         </GridContainer>
       </div>

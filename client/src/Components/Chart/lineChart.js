@@ -16,27 +16,38 @@ const Chartjs = () => {
         data={{
           datasets: [
             {
-              label: "score",
+              label: "Score",
               backgroundColor: "rgba(54, 162, 235, 0.5)",
               borderColor: "rgb(54, 162, 235)",
               cubicInterpolationMode: "monotone",
-              fill: true,
+              // fill: true,
               data: dataRef.current,
             },
           ],
         }}
         options={{
+          showLines: true,
+          animation: false,
           scales: {
             x: {
               type: "realtime",
               realtime: {
-                delay: 7000,
+                delay: 0,
               },
             },
             y: {
               type: "linear",
-              min: -10,
-              max: 10,
+              min: -20,
+              max: 20,
+            },
+          },
+          plugins: {
+            legend: {
+              position: "right",
+            },
+            title: {
+              display: true,
+              text: "Realtime Sentiment Score Chart",
             },
           },
         }}

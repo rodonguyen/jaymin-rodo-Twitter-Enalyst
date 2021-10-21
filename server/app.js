@@ -66,6 +66,7 @@ io.on("connection", (socket) => {
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
     const timer = payload.timer * 1000;
+    //Write Dynamo there (Rodo)
     console.log("Keyword: %s %s", keyword, timer);
 
     console.log("New Twitter Stream!");

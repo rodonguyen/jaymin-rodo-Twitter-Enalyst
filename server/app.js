@@ -6,7 +6,18 @@ var logger = require("morgan");
 var http = require("http");
 var socketio = require("socket.io");
 var googleTrends = require("google-trends-api");
-
+// --- Rodo ---
+var AWS = require("aws-sdk");
+const { env } = require("process");
+var awsConfig = {
+    "region": "ap-southeast-2",
+    "endpoint": "http://dynamodb.ap-southeast-2.amazonaws.com",
+    "accessKeyId": "AKIAVOMJOYRWD34QPA6S", "secretAccessKey": "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"
+};
+AWS.config.update(awsConfig);
+var docClient = new AWS.DynamoDB.DocumentClient();
+var table = "TwitterEnalyst";
+// ------------
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var clientTwitter = require("./module/twitter");
@@ -109,7 +120,7 @@ io.on("connection", (socket) => {
               keyword = keyword.split(" ").join("-");
               result.keyword = keyword;
               socket.emit("trending", result);
-              console.log("sent", trend);
+              // console.log("sent", trend);
             });
           }
         });
@@ -119,7 +130,9 @@ io.on("connection", (socket) => {
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
     const timer = payload.timer * 1000;
-    //Write Dynamo there (Rodo)
+    //Write Dynamo here (Rodo)
+    write(keyword, '', getDateTime());
+
     console.log("Keyword: %s %s", keyword, timer);
 
     console.log("New Twitter Stream!");
@@ -180,4 +193,28 @@ io.on("connection", (socket) => {
   });
 }); //END io.sockets.on
 
+
+// --- Rodo ---
+var getDateTime = function() {
+    // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
+    return new Date().toISOString().slice(0,19);
+}
+
+var write = function (keyword, summary, timeStamp) {
+    var input = {
+        "keywords": keyword, "Summary": summary, "timeStamp": timeStamp  
+    };
+    var params = {
+        TableName: table,
+        Item:  input
+    };
+    docClient.put(params, function (err, data) {
+        if (err) {
+            console.log("keyword::write::error - " + JSON.stringify(err, null, 2));                      
+        } else {
+            console.log("AdWrote to DynamoDB: " + JSON.stringify(input) );                      
+        }
+    });
+}
+// -----------
 module.exports = { app: app, server: server };

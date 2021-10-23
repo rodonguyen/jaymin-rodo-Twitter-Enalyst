@@ -28,8 +28,7 @@ CAB432 Assignment 2 (Semester 2, 2021)
 | ------- | ----------------------- | --- |
 | x       | Discuss from tutor's feedback  | Ok
 | .       | Done 20% of the report (write down main points to understand the structure of the assignment and CRA/marks allocation) |
-| .       | Project: 60% done, Basic features are operational  <br> Front-end  <br> Scaling is working but not required to be perfect  <br>  At least 1 persistence level |
-| .       | Catch up with tutor for feedback/questions | Will do this on early week 13 |                              
+| x       | Project: 60% done, Basic features are operational  <br> Front-end  <br> Scaling is working but not required to be perfect  <br>  At least 1 persistence level | Only 50%, Features are done. <br> Need to speed up to Scaling and Persistence.                           
 
 | Week 13 | (Starts on 25 Oct)                        |     |
 | ------- | ----------------------------------------- | --- |

@@ -130,11 +130,10 @@ io.on("connection", (socket) => {
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
     const timer = payload.timer * 1000;
-    //Write Dynamo here (Rodo)
+//Write Dynamo here (Rodo)
     write(keyword, '', getDateTime());
 
     console.log("Keyword: %s %s", keyword, timer);
-
     console.log("New Twitter Stream!");
 
     // Start the stream with tracking the keyword
@@ -212,7 +211,7 @@ var write = function (keyword, summary, timeStamp) {
         if (err) {
             console.log("keyword::write::error - " + JSON.stringify(err, null, 2));                      
         } else {
-            console.log("AdWrote to DynamoDB: " + JSON.stringify(input) );                      
+            console.log("Wrote to DynamoDB: " + JSON.stringify(input) );                      
         }
     });
 }

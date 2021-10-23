@@ -6,7 +6,19 @@ var logger = require("morgan");
 var http = require("http");
 var socketio = require("socket.io");
 var googleTrends = require("google-trends-api");
-
+// --- Rodo ---
+var AWS = require("aws-sdk");
+const { env } = require("process");
+var awsConfig = {
+  region: "ap-southeast-2",
+  endpoint: "http://dynamodb.ap-southeast-2.amazonaws.com",
+  accessKeyId: "AKIAVOMJOYRWD34QPA6S",
+  secretAccessKey: "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",
+};
+AWS.config.update(awsConfig);
+var docClient = new AWS.DynamoDB.DocumentClient();
+var table = "TwitterEnalyst";
+// ------------
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var clientTwitter = require("./module/twitter");
@@ -95,6 +107,10 @@ io.on("connection", (socket) => {
     //Write keyword to Dynamo there (Rodo)
     console.log("Keyword: %s %s", keyword, timer);
 
+    //Write Dynamo here (Rodo)
+    write(keyword, "", getDateTime());
+
+    console.log("Keyword: %s %s", keyword, timer);
     console.log("New Twitter Stream!");
 
     // Start the stream with tracking the keyword
@@ -175,4 +191,29 @@ io.on("connection", (socket) => {
   });
 }); //END io.sockets.on
 
+// --- Rodo ---
+var getDateTime = function () {
+  // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
+  return new Date().toISOString().slice(0, 19);
+};
+
+var write = function (keyword, summary, timeStamp) {
+  var input = {
+    keywords: keyword,
+    Summary: summary,
+    timeStamp: timeStamp,
+  };
+  var params = {
+    TableName: table,
+    Item: input,
+  };
+  docClient.put(params, function (err, data) {
+    if (err) {
+      console.log("keyword::write::error - " + JSON.stringify(err, null, 2));
+    } else {
+      console.log("Wrote to DynamoDB: " + JSON.stringify(input));
+    }
+  });
+};
+// -----------
 module.exports = { app: app, server: server };

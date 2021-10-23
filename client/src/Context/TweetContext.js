@@ -9,6 +9,8 @@ const TweetProvider = ({ children }) => {
   const [Tweet, setTweet] = useState({});
   const [idTweet, setIdTweet] = useState([]);
   const [scoreTweet, setScoreTweet] = useState([]);
+  const [scoreSearchTweet, setScoreSearchTweet] = useState([]);
+  const [achirveScore, setAchirveScore] = useState({});
   const dataRef = useRef([]);
   // console.log(keyword);
   return (
@@ -27,6 +29,10 @@ const TweetProvider = ({ children }) => {
         dataRef,
         scoreTweet,
         setScoreTweet,
+        scoreSearchTweet,
+        setScoreSearchTweet,
+        achirveScore,
+        setAchirveScore,
       }}
     >
       {children}

@@ -7,16 +7,11 @@ import { TweetContext } from "../../Context/TweetContext";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import TweetEmbed from "react-tweet-embed";
-import LocationOn from "@material-ui/icons/LocationOn";
 import "./TweetGrid/_plugin-react-slick.scss";
 
 import GridContainer from "./TweetGrid/TweetGridContainer";
 import GridItem from "./TweetGrid/TweetGridItem";
 import Card from "./TweetGrid/TweetCard";
-
-import image1 from "../../assets/img/bg.jpg";
-import image2 from "../../assets/img/bg2.jpg";
-import image3 from "../../assets/img/bg3.jpg";
 
 const ENDPOINT = "http://localhost:3000/";
 const socket = io(ENDPOINT, {});
@@ -27,21 +22,21 @@ export default function Tweets() {
   const {
     keyword,
     streamTime,
-    setStreamTime,
     trendingKeyword,
     Tweet,
     setTweet,
     idTweet,
     setIdTweet,
     dataRef,
-    scoreTweet,
     setScoreTweet,
+    scoreSearchTweet,
+    setScoreSearchTweet,
+    achirveScore,
   } = useContext(TweetContext);
 
   const path = { keyword: keyword.input, timer: streamTime.timerStream };
-
-  console.log("id", idTweet);
-  console.log("id", scoreTweet);
+  console.log(achirveScore);
+  console.log("id", scoreSearchTweet);
   useEffect(() => {
     const tweet = Tweet;
     if (tweet.num_score !== undefined) {
@@ -53,7 +48,6 @@ export default function Tweets() {
       }, 7000);
     }
   }, [Tweet]);
-
   useEffect(() => {
     if (keyword.input) {
       socket.emit("search", path);
@@ -62,19 +56,32 @@ export default function Tweets() {
           socket.on("sendTweet", (receivedTweet) => {
             setTweet(receivedTweet.tweet);
           }),
-        5000
+        3000
       );
+
+      socket.on("searchTweet", (tweets) => {
+        setTimeout(
+          () =>
+            setScoreSearchTweet((ScoreSearchTweet) => [
+              ...ScoreSearchTweet,
+              tweets.tweet.num_score,
+            ]),
+          3000
+        );
+      });
     }
   }, [keyword]);
 
   useEffect(() => {
+    socket.emit("achirveScore", achirveScore.averageScore);
+  }, [achirveScore]);
+
+  useEffect(() => {
     socket.on("trending", (trendingKeyword) => {
-      console.log("trend", trendingKeyword);
+      // console.log("trend", trendingKeyword);
     });
   }, [trendingKeyword]);
-
   const classes = useStyles();
-
   return (
     <div className={classes.section}>
       <div className={classes.container}>

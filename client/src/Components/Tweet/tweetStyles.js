@@ -8,6 +8,11 @@ const tweetStyle = {
   marginAuto: {
     marginLeft: "auto !important",
     marginRight: "auto !important",
+    overflow: "scroll",
+    height: "800px",
+  },
+  tweet: {
+    marginLeft: "20px",
   },
 };
 

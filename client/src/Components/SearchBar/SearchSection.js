@@ -26,6 +26,7 @@ import Chart from "../Chart/lineChart";
 import TotalChart from "../Chart/TotalScoreChart";
 import TotalSearchChart from "../Chart/TotalSearchTweet";
 import styles from "./searchStyles";
+import GoogleTrends from "../TrendingKeyword/GoogleTrending";
 
 const useStyles = makeStyles(styles);
 
@@ -137,7 +138,9 @@ export default function SectionLogin() {
                   </form>
                 </Card>
                 <h1>
-                  <Card>trending</Card>
+                  <Card className={classes.trends}>
+                    <GoogleTrends />
+                  </Card>
                 </h1>
               </div>
             )}

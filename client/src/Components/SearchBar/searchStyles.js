@@ -68,6 +68,11 @@ const loginStyle = {
     paddingLeft: "7rem",
     paddingRight: "7rem",
   },
+  trends: {
+    paddingBottom: "3rem",
+    paddingTop: "1rem",
+    paddingRight: "3rem",
+  },
 };
 
 export default loginStyle;

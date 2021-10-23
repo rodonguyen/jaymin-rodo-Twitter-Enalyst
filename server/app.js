@@ -54,34 +54,6 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-// const GetTrendingKeyword = function () {
-//   const trendingKeyword = [];
-//   googleTrends.realTimeTrends(
-//     {
-//       geo: "AU",
-//       category: "all",
-//     },
-//     function (err, results) {
-//       if (err) {
-//         console.log(err);
-//       } else {
-//         const trends = JSON.parse(results);
-//         trends.storySummaries.trendingStories.forEach((trend) => {
-//           const result = {};
-//           if (trend.entityNames.length >= 1) {
-//             trend.entityNames.forEach((keyword) => {
-//               keyword = keyword.split(" ").join("-");
-//               result.keyword = keyword;
-//               trendingKeyword.push(result);
-//             });
-//           }
-//         });
-//       }
-//     }
-//   );
-//   return trendingKeyword;
-// };
-
 const connections = [];
 io.on("connection", (socket) => {
   socket.emit("your id", socket.id);
@@ -120,7 +92,7 @@ io.on("connection", (socket) => {
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
     const timer = payload.timer * 1000;
-    //Write Dynamo there (Rodo)
+    //Write keyword to Dynamo there (Rodo)
     console.log("Keyword: %s %s", keyword, timer);
 
     console.log("New Twitter Stream!");
@@ -189,6 +161,7 @@ io.on("connection", (socket) => {
     );
   });
   socket.on("achirveScore", (score) => {
+    //Rodo (score from client to store)
     console.log("achirveScore", score);
   });
   socket.on("disconnect", () => {

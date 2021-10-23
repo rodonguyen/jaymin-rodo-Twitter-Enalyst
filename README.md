@@ -68,6 +68,19 @@ Questions / Action points:
 - Does Twitter Search have 'Time from ... to ...' parameter? - Rodo  
 - Sentiment and Natural, NLTK functions difference? Research  
   
+### Meeting notes 23/10/2021
+Current progress:
+- App works: Twitter, Sentiment, DynamoDB 
+
+Action points in week 13:  
+- Add summary to DynamoDB write function
+- Run successful on VM (if not, create Docker Image)
+- Front-end needs fixing with charts
+- Add summary to DynamoDB
+- Rodo to write 20% report in week 12
+- **Redis**
+- **Scaling**
 
 
+DynamoDB login: [link](https://signin.aws.amazon.com/signin?redirect_uri=https%3A%2F%2Fconsole.aws.amazon.com%2Fconsole%2Fhome%3Ffromtb%3Dtrue%26hashArgs%3D%2523%26isauthcode%3Dtrue%26state%3DhashArgsFromTB_us-east-1_189672ac601799c9&client_id=arn%3Aaws%3Asignin%3A%3A%3Aconsole%2Fcanvas&forceMobileApp=0&code_challenge=nJp30JQhF5vfh_kGGELi8SFm0IP-PAtgqWJouCCLzto&code_challenge_method=SHA-256) / duy8anh1@gmail.com / DAnd82@@
 <br>

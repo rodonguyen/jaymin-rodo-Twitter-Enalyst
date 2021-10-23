@@ -8,11 +8,6 @@ CAB432 Assignment 2 (Semester 2, 2021)
 
 ## **Progresses**
 
-| Break |                    |                       |
-| ----- | ------------------ | --------------------- |
-| x     | Create Github repo | [Link](https://github.com/rodonguyen/jaymin-rodo-CAB432-project)
-| x     | Discuss Idea       | Decided to do Twitter |
-
 | Week 10 + 11 | (4-17 Oct)                           |     |
 | ------------ | ------------------------------------ | --- |
 | x            | Basic project idea: <br> - Purpose, description <br> - API use, use cases <br> - Outline desired architecture: Scaling and Persistence choice  |  Most parts are identical to Sheep's |

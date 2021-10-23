@@ -45,7 +45,7 @@ var update = function () {
         if (err) {
             console.log("keyword::update::error - " + JSON.stringify(err, null, 2));
         } else {
-            console.log("keyword::update::success " + JSON.stringify(data) );
+            console.log("keyword::update::success " + JSON.stringify(input) );
         }
     });
 }
@@ -72,7 +72,7 @@ var write = function (keyword, summary, timeStamp) {
         if (err) {
             console.log("keyword::write::error - " + JSON.stringify(err, null, 2));                      
         } else {
-            console.log("Added: " + JSON.stringify(data) );                      
+            console.log("Added: " + JSON.stringify(input) );                      
         }
     });
 }
@@ -89,12 +89,13 @@ var remove = function () {
         if (err) {
             console.log("keyword::delete::error - " + JSON.stringify(err, null, 2));
         } else {
-            console.log("Deleted: " + JSON.stringify(data) );
+            console.log("Deleted: " + JSON.stringify(input) );
         }
     });
 }
 
 // remove();
-write('btc', 'mockup summary', getDateTime());
+const summary_mockup = {'hi': 4, 'low':-1};
+write('btc', JSON.stringify(summary_mockup), getDateTime());
 // update();
 // read();

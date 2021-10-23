@@ -23,7 +23,8 @@ const io = socketio(server, {
     methods: ["GET", "POST"],
   },
 });
-process.setMaxListeners(0);
+
+process.setMaxListeners(Infinity);
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
@@ -109,7 +110,7 @@ io.on("connection", (socket) => {
               keyword = keyword.split(" ").join("-");
               result.keyword = keyword;
               socket.emit("trending", result);
-              console.log("sent", trend);
+              // console.log("sent", trend);
             });
           }
         });
@@ -138,7 +139,7 @@ io.on("connection", (socket) => {
       clientStream = stream;
       timeStamp = Date.now();
       console.log("timer:", prevTimestamp + timer);
-      console.log("timer:", timeStamp);
+      console.log("now:", timeStamp);
       // Send Tweet Object to Client
       if (timeStamp > prevTimestamp + timer) {
         clientStream.destroy();
@@ -152,16 +153,6 @@ io.on("connection", (socket) => {
           tweet: sentiment.getSentiment(tweet),
         });
         console.log("Tweet sent");
-
-        socket.on("disconnect", () => {
-          connections.splice(connections.indexOf(socket), 1);
-          socket.disconnect();
-          clientStream.destroy();
-          console.log(
-            "Socket disconnected: %s sockets remaining",
-            connections.length
-          );
-        });
 
         stream.on("error", function (message) {
           console.log("Ooops! Error: " + message);
@@ -177,6 +168,37 @@ io.on("connection", (socket) => {
         });
       }
     });
+    clientTwitter.get(
+      "search/tweets",
+      { q: keyword, lang: "en", count: "100" },
+      function (error, tweets) {
+        if (error) {
+          console.log("Error: " + error);
+        } else {
+          // console.log("searchTweet", tweets);
+
+          tweets.statuses.forEach(function (tweet) {
+            socket.emit("searchTweet", {
+              tweet: sentiment.getSentiment(tweet),
+            });
+
+            console.log("sent Search Tweet");
+          });
+        }
+      }
+    );
+  });
+  socket.on("achirveScore", (score) => {
+    console.log("achirveScore", score);
+  });
+  socket.on("disconnect", () => {
+    connections.splice(connections.indexOf(socket), 1);
+    socket.disconnect();
+    // clientStream.destroy();
+    console.log(
+      "Socket disconnected: %s sockets remaining",
+      connections.length
+    );
   });
 }); //END io.sockets.on
 

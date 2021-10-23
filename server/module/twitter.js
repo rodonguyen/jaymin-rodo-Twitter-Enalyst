@@ -9,8 +9,12 @@ const clientTwitter = new Twitter({
   access_token_secret: "TooAlU91Y04nTiqOzhO3k295iRYMBWZOwkwyMsScPcI4w",
 });
 
-// clientTwitter.get('search/tweets', {q: 'rodo', lang: 'en', count: '100'}, function(error, tweets, response) {
-//   console.log(tweets);
-// });
+// clientTwitter.get(
+//   "search/tweets",
+//   { q: "rodo", lang: "en", count: "100" },
+//   function (error, tweets, response) {
+//     console.log(tweets);
+//   }
+// );
 
 module.exports = clientTwitter;

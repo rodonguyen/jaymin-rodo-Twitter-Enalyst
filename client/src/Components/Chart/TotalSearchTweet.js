@@ -21,28 +21,37 @@ const options = {
     },
     title: {
       display: true,
-      text: "Reaaltime Sentiment Score Summary",
+      text: "100 Most Recent Posts Summary ",
     },
   },
 };
-const TotalScoreChart = () => {
-  const { scoreTweet } = useContext(TweetContext);
+const TotalSearchChart = () => {
+  const { scoreSearchTweet, setAchirveScore } = useContext(TweetContext);
   const [negativeScore, setNegativeScore] = useState(0);
   const [positiveScore, setPositiveScore] = useState(0);
 
   useEffect(() => {
-    scoreTweet.forEach((x) => {
+    scoreSearchTweet.forEach((x) => {
       if (x >= 0) {
         setPositiveScore(x + negativeScore);
       } else {
         setNegativeScore(-x + negativeScore);
       }
     });
-  }, [scoreTweet]);
+  }, [scoreSearchTweet]);
+  useEffect(() => {
+    setAchirveScore({
+      negativeScore: negativeScore,
+      positiveScore: positiveScore,
+      sumScore: sumScore,
+      averageScore: averageScore,
+    });
+  }, [scoreSearchTweet]);
   const averageScore = (positiveScore + negativeScore) / 2;
   const sumScore = positiveScore + negativeScore;
   const data = [negativeScore, positiveScore, sumScore, averageScore];
-  // console.log("chart", data);
+
+  console.log("chart", data);
   return (
     <div>
       <Bar
@@ -73,4 +82,4 @@ const TotalScoreChart = () => {
   );
 };
 
-export default TotalScoreChart;
+export default TotalSearchChart;

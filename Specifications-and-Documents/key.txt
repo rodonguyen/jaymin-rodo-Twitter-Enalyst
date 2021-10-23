@@ -1,0 +1,2 @@
+User name	Password	Access key ID	Secret access key	Console login link
+rodo_01		AKIAVOMJOYRWD34QPA6S	kZjZq9AIdgNr72B+VtRAFu+Pmm4SH2ExIIpI035s	https://374487303276.signin.aws.amazon.com/console

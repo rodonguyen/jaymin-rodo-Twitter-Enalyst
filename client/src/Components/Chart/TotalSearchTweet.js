@@ -1,3 +1,4 @@
+// import { Console } from "console";
 import React, { useContext, useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import { TweetContext } from "../../Context/TweetContext";
@@ -21,33 +22,35 @@ const options = {
     },
     title: {
       display: true,
-      text: "100 Most Recent Posts Summary ",
+      text: "100 Most Recent Posts' Sentiment Score Summary",
     },
   },
 };
 const TotalSearchChart = () => {
-  const { scoreSearchTweet, setAchirveScore } = useContext(TweetContext);
+  const {scoreSearchTweet, setAchirveScore } = useContext(TweetContext);
   const [negativeScore, setNegativeScore] = useState(0);
   const [positiveScore, setPositiveScore] = useState(0);
 
   useEffect(() => {
     scoreSearchTweet.forEach((x) => {
       if (x >= 0) {
-        setPositiveScore(x + positiveScore);
+        setPositiveScore(positiveScore + x);
       } else {
-        setNegativeScore(-x + negativeScore);
+        setNegativeScore(negativeScore - x);
       }
     });
   }, [scoreSearchTweet]);
+
   useEffect(() => {
     setAchirveScore({
       negativeScore: negativeScore,
       positiveScore: positiveScore,
     });
   }, [scoreSearchTweet]);
+
   const data = [negativeScore, positiveScore];
 
-  console.log("chart", data);
+//   console.log("chart=============================", data.negativeScore);
   return (
     <div>
       <Bar

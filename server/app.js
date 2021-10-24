@@ -9,11 +9,14 @@ var googleTrends = require("google-trends-api");
 // --- Rodo ---
 var AWS = require("aws-sdk");
 const { env } = require("process");
+var dotenv = require('dotenv');
+dotenv.config();
+
 var awsConfig = {
   region: "ap-southeast-2",
-  endpoint: "http://dynamodb.ap-southeast-2.amazonaws.com",
-  accessKeyId: "AKIAVOMJOYRWD34QPA6S",
-  secretAccessKey: "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",
+  endpoint: process.env.AWS_ENDPOINT,
+  accessKeyId: process.env.AWS_KEYID,
+  secretAccessKey: process.env.AWS_SECRETKEY,
 };
 AWS.config.update(awsConfig);
 var docClient = new AWS.DynamoDB.DocumentClient();
@@ -23,6 +26,7 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var clientTwitter = require("./module/twitter");
 var sentiment = require("./module/sentiment");
+const { timeStamp } = require("console");
 var app = express();
 
 // Create the http server
@@ -101,16 +105,14 @@ io.on("connection", (socket) => {
       }
     }
   );
+
+  var keywordToDynamo, summary; // Rodo declares
+
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
     const timer = payload.timer * 1000;
-    //Write keyword to Dynamo there (Rodo)
-    console.log("Keyword: %s %s", keyword, timer);
-
-    //Write Dynamo here (Rodo)
-    write(keyword, "", getDateTime());
-
-    console.log("Keyword: %s %s", keyword, timer);
+    keywordToDynamo = keyword;
+    console.log("Keyword: %s %s", keywordToDynamo, timer);
     console.log("New Twitter Stream!");
 
     // Start the stream with tracking the keyword
@@ -156,30 +158,43 @@ io.on("connection", (socket) => {
         });
       }
     });
-    clientTwitter.get(
-      "search/tweets",
-      { q: keyword, lang: "en", count: "100" },
-      function (error, tweets) {
-        if (error) {
-          console.log("Error: " + error);
-        } else {
-          // console.log("searchTweet", tweets);
 
-          tweets.statuses.forEach(function (tweet) {
-            socket.emit("searchTweet", {
-              tweet: sentiment.getSentiment(tweet),
+    // Rodo
+    var data = readDynamo(keywordToDynamo);
+    if  ( isFresh(data) ) {
+      summary = data.summary;
+      // set Score on Chart 3 to 'summary' score
+      //
+      //
+      //
+    }
+    else {
+        clientTwitter.get(
+        "search/tweets",
+        { q: keyword, lang: "en", count: "100" },
+        function (error, tweets) {
+            if (error) {
+            console.log("Error: " + error);
+            } else {
+            // console.log("searchTweet", tweets);
+            tweets.statuses.forEach(function (tweet) {
+                socket.emit("searchTweet", {
+                tweet: sentiment.getSentiment(tweet),
+                });
+                console.log("sent Search Tweet");
             });
-
-            console.log("sent Search Tweet");
-          });
+            }
         }
-      }
-    );
+        );
+    }
   });
+  
   socket.on("achirveScore", (score) => {
     //Rodo (score from client to store)
     console.log("achirveScore", score);
+    summary = score;  // Rodo
   });
+
   socket.on("disconnect", () => {
     connections.splice(connections.indexOf(socket), 1);
     socket.disconnect();
@@ -188,19 +203,38 @@ io.on("connection", (socket) => {
       "Socket disconnected: %s sockets remaining",
       connections.length
     );
+
+    // --- Rodo ---
+    // Write summary to Dynamo as client refresh page =))
+    summary = JSON.stringify(summary);
+    console.log("summary=====================================", summary);
+    writeDynamo(keywordToDynamo, summary, getDateTime());
   });
+
 }); //END io.sockets.on
 
+
 // --- Rodo ---
+
+var isFresh = function(data) { 
+    if (data !== 0) {
+        timeStamp = new Date(data.timeStamp);
+        now = Date().now()
+        return Math.abs(now - timeStamp)/3600/1000 < 24? 1 : 0
+    } else {
+        return 0
+    }
+}
+
 var getDateTime = function () {
   // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
   return new Date().toISOString().slice(0, 19);
 };
 
-var write = function (keyword, summary, timeStamp) {
+var writeDynamo = function (keyword, summary, timeStamp) {
   var input = {
     keywords: keyword,
-    Summary: summary,
+    summary: summary,
     timeStamp: timeStamp,
   };
   var params = {
@@ -209,11 +243,30 @@ var write = function (keyword, summary, timeStamp) {
   };
   docClient.put(params, function (err, data) {
     if (err) {
-      console.log("keyword::write::error - " + JSON.stringify(err, null, 2));
+      console.log("Write to DynamoDB::error - Could be because new socket starts and summary=null \n" + JSON.stringify(err, null, 2));
     } else {
       console.log("Wrote to DynamoDB: " + JSON.stringify(input));
     }
   });
 };
+
+var readDynamo = function (keyword) {
+    var params = {
+        TableName: table,
+        Key: {
+            "keywords": keyword
+        }
+    };
+    docClient.get(params, function (err, data) {
+        if (err) {
+            console.log("keyword::read::error - " + JSON.stringify(err, null, 2));
+            return 0;
+        }
+        else {
+            console.log("Read: " + JSON.stringify(data, null, 2));
+            return data;
+        }
+    })
+}
 // -----------
 module.exports = { app: app, server: server };

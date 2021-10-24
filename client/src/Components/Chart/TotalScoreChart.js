@@ -21,7 +21,7 @@ const options = {
     },
     title: {
       display: true,
-      text: "Reaaltime Sentiment Score Summary",
+      text: "Realtime Sentiment Score Summary",
     },
   },
 };

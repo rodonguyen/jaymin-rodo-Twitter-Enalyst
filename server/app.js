@@ -9,6 +9,8 @@ var googleTrends = require("google-trends-api");
 // --- Rodo ---
 var AWS = require("aws-sdk");
 const { env } = require("process");
+const redis = require('redis');
+const redisClient = redis.createClient();
 var dotenv = require('dotenv');
 dotenv.config();
 
@@ -26,7 +28,8 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var clientTwitter = require("./module/twitter");
 var sentiment = require("./module/sentiment");
-const { timeStamp } = require("console");
+var { timeStamp } = require("console");
+
 var app = express();
 
 // Create the http server
@@ -106,13 +109,13 @@ io.on("connection", (socket) => {
     }
   );
 
-  var keywordToDynamo, summary; // Rodo declares
+  var keywordToStorage, summary, redisKey; // Rodo declares
 
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
     const timer = payload.timer * 1000;
-    keywordToDynamo = keyword;
-    console.log("Keyword: %s %s", keywordToDynamo, timer);
+    keywordToStorage = keyword;
+    console.log("Keyword: %s %s", keywordToStorage, timer);
     console.log("New Twitter Stream!");
 
     // Start the stream with tracking the keyword
@@ -159,34 +162,55 @@ io.on("connection", (socket) => {
       }
     });
 
-    // Rodo
-    var data = readDynamo(keywordToDynamo);
-    if  ( isFresh(data) ) {
-      summary = data.summary;
-      // set Score on Chart 3 to 'summary' score
-      //
-      //
-      //
-    }
-    else {
-        clientTwitter.get(
-        "search/tweets",
-        { q: keyword, lang: "en", count: "100" },
-        function (error, tweets) {
-            if (error) {
-            console.log("Error: " + error);
-            } else {
-            // console.log("searchTweet", tweets);
-            tweets.statuses.forEach(function (tweet) {
-                socket.emit("searchTweet", {
-                tweet: sentiment.getSentiment(tweet),
-                });
-                console.log("sent Search Tweet");
-            });
+    
+    // Rodo: get data from storage if available
+    // Is this redisClient.get() gonna execute constantly cuz it's in socket?
+    redisKey = `TwitterEnalyst:${keywordToStorage}`
+    /*
+    redisClient.get(redisKey, (error, result) => {
+        if (isFresh(result.timeStamp)) {
+            const resultJSON = JSON.parse(result);
+            summary = resultJSON.summary
+        }
+        // Get waanted data from DynamoDB
+        else {
+            var data = readDynamo(keywordToStorage);
+            if  ( isFresh(data) ) {
+              summary = data.summary;
+              // set Score on Chart 3 to 'summary' score
+              //
+              // store 'summary' in Redis here?
+              // redisClient.setex(
+                //     redisKey,
+                //     3600,
+                //     JSON.stringify({ source: "Redis Cache", ...?summary and datetime? })
+                // );
+                // console.log("Successfully uploaded data to Redis " + redisKey);
+            }
+            // Get new data since there's no wanted data from the storages
+            else {
+                clientTwitter.get(
+                "search/tweets",
+                { q: keyword, lang: "en", count: "100" },
+                function (error, tweets) {
+                    if (error) {
+                    console.log("Error: " + error);
+                    } else {
+                    // console.log("searchTweet", tweets);
+                    tweets.statuses.forEach(function (tweet) {
+                        socket.emit("searchTweet", {
+                        tweet: sentiment.getSentiment(tweet),
+                        });
+                        console.log("sent Search Tweet");
+                    });
+                    }
+                }
+                );
             }
         }
-        );
-    }
+    });
+    */
+
   });
   
   socket.on("achirveScore", (score) => {
@@ -207,8 +231,8 @@ io.on("connection", (socket) => {
     // --- Rodo ---
     // Write summary to Dynamo as client refresh page =))
     summary = JSON.stringify(summary);
-    console.log("summary=====================================", summary);
-    writeDynamo(keywordToDynamo, summary, getDateTime());
+    writeDynamo(keywordToStorage, summary, getDateTime());
+    writeRedis(redisClient, redisKey, summary);     // TODO
   });
 
 }); //END io.sockets.on
@@ -230,6 +254,17 @@ var getDateTime = function () {
   // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
   return new Date().toISOString().slice(0, 19);
 };
+
+var writeRedis = function (redisClient, redisKey, summary) {
+    var input = { summary: summary, timeStamp: getDateTime() }
+    redisClient.setex(
+        redisKey,
+        3600,
+        JSON.stringify({ summary: summary, timeStamp: getDateTime() })
+    )
+    // .catch( e => console.log('Error on writeRedis function. Maybe undefined arg.'));
+    console.log('Wrote on Redis: ', JSON.stringify(input));
+}
 
 var writeDynamo = function (keyword, summary, timeStamp) {
   var input = {
@@ -268,5 +303,7 @@ var readDynamo = function (keyword) {
         }
     })
 }
+
+
 // -----------
 module.exports = { app: app, server: server };

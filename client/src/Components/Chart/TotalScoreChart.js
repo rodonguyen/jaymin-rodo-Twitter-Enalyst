@@ -33,9 +33,9 @@ const TotalScoreChart = () => {
   useEffect(() => {
     scoreTweet.forEach((x) => {
       if (x >= 0) {
-        setPositiveScore(x + positiveScore);
+        setPositiveScore(positiveScore + x);
       } else {
-        setNegativeScore(-x + negativeScore);
+        setNegativeScore(negativeScore - x);
       }
     });
   }, [scoreTweet]);

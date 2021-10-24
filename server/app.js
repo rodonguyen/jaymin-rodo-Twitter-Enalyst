@@ -101,16 +101,14 @@ io.on("connection", (socket) => {
       }
     }
   );
+
+  var keywordToDynamo, summary; // Rodo declares
+
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
     const timer = payload.timer * 1000;
-    //Write keyword to Dynamo there (Rodo)
-    console.log("Keyword: %s %s", keyword, timer);
-
-    //Write Dynamo here (Rodo)
-    write(keyword, "", getDateTime());
-
-    console.log("Keyword: %s %s", keyword, timer);
+    keywordToDynamo = keyword;
+    console.log("Keyword: %s %s", keywordToDynamo, timer);
     console.log("New Twitter Stream!");
 
     // Start the stream with tracking the keyword
@@ -176,10 +174,13 @@ io.on("connection", (socket) => {
       }
     );
   });
+  
   socket.on("achirveScore", (score) => {
     //Rodo (score from client to store)
     console.log("achirveScore", score);
+    summary = score;  // Rodo
   });
+
   socket.on("disconnect", () => {
     connections.splice(connections.indexOf(socket), 1);
     socket.disconnect();
@@ -188,8 +189,16 @@ io.on("connection", (socket) => {
       "Socket disconnected: %s sockets remaining",
       connections.length
     );
+
+        // --- Rodo ---
+    // Write summary to Dynamo as client refresh page =))
+    summary = JSON.stringify(summary);
+    console.log("summary=====================================", summary);
+    writeDynamo(keywordToDynamo, summary, getDateTime());
   });
+
 }); //END io.sockets.on
+
 
 // --- Rodo ---
 var getDateTime = function () {
@@ -197,10 +206,10 @@ var getDateTime = function () {
   return new Date().toISOString().slice(0, 19);
 };
 
-var write = function (keyword, summary, timeStamp) {
+var writeDynamo = function (keyword, summary, timeStamp) {
   var input = {
     keywords: keyword,
-    Summary: summary,
+    summary: summary,
     timeStamp: timeStamp,
   };
   var params = {
@@ -209,7 +218,7 @@ var write = function (keyword, summary, timeStamp) {
   };
   docClient.put(params, function (err, data) {
     if (err) {
-      console.log("keyword::write::error - " + JSON.stringify(err, null, 2));
+      console.log("Write to DynamoDB::error - Could be because new socket starts and summary=null \n" + JSON.stringify(err, null, 2));
     } else {
       console.log("Wrote to DynamoDB: " + JSON.stringify(input));
     }

@@ -21,7 +21,7 @@ const options = {
     },
     title: {
       display: true,
-      text: "Reaaltime Sentiment Score Summary",
+      text: "Realtime Sentiment Score Summary",
     },
   },
 };
@@ -33,7 +33,7 @@ const TotalScoreChart = () => {
   useEffect(() => {
     scoreTweet.forEach((x) => {
       if (x >= 0) {
-        setPositiveScore(x + negativeScore);
+        setPositiveScore(x + positiveScore);
       } else {
         setNegativeScore(-x + negativeScore);
       }

@@ -75,7 +75,7 @@ export default function Tweets() {
   }, [keyword]);
 
   useEffect(() => {
-    socket.emit("achirveScore", achirveScore.averageScore);
+    socket.emit("achirveScore", achirveScore);
   }, [achirveScore]);
 
   useEffect(() => {

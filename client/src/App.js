@@ -14,7 +14,7 @@ function App(props) {
   const classes = useStyles();
   const { ...rest } = props;
   return (
-    <div>
+    <div className="main">
       <TweetProvider>
         <CssBaseline />
         <Header

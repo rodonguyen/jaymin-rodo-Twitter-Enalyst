@@ -33,7 +33,7 @@ const TotalSearchChart = () => {
   useEffect(() => {
     scoreSearchTweet.forEach((x) => {
       if (x >= 0) {
-        setPositiveScore(x + negativeScore);
+        setPositiveScore(x + positiveScore);
       } else {
         setNegativeScore(-x + negativeScore);
       }

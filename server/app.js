@@ -164,6 +164,9 @@ io.on("connection", (socket) => {
     if  ( isFresh(data) ) {
       summary = data.summary;
       // set Score on Chart 3 to 'summary' score
+      //
+      //
+      //
     }
     else {
         clientTwitter.get(

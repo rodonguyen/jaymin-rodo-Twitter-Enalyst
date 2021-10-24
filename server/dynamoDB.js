@@ -11,11 +11,11 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 var table = "TwitterEnalyst";
 
 
-var read = function () {
+var readDynamo = function (keyword) {
     var params = {
         TableName: table,
         Key: {
-            "keywords": "cat"
+            "keywords": keyword
         }
     };
     docClient.get(params, function (err, data) {

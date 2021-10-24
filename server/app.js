@@ -9,11 +9,14 @@ var googleTrends = require("google-trends-api");
 // --- Rodo ---
 var AWS = require("aws-sdk");
 const { env } = require("process");
+var dotenv = require('dotenv');
+dotenv.config();
+
 var awsConfig = {
   region: "ap-southeast-2",
-  endpoint: "http://dynamodb.ap-southeast-2.amazonaws.com",
-  accessKeyId: "AKIAVOMJOYRWD34QPA6S",
-  secretAccessKey: "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",
+  endpoint: process.env.AWS_ENDPOINT,
+  accessKeyId: process.env.AWS_KEYID,
+  secretAccessKey: process.env.AWS_SECRETKEY,
 };
 AWS.config.update(awsConfig);
 var docClient = new AWS.DynamoDB.DocumentClient();
@@ -23,6 +26,7 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var clientTwitter = require("./module/twitter");
 var sentiment = require("./module/sentiment");
+const { timeStamp } = require("console");
 var app = express();
 
 // Create the http server
@@ -154,25 +158,32 @@ io.on("connection", (socket) => {
         });
       }
     });
-    clientTwitter.get(
-      "search/tweets",
-      { q: keyword, lang: "en", count: "100" },
-      function (error, tweets) {
-        if (error) {
-          console.log("Error: " + error);
-        } else {
-          // console.log("searchTweet", tweets);
 
-          tweets.statuses.forEach(function (tweet) {
-            socket.emit("searchTweet", {
-              tweet: sentiment.getSentiment(tweet),
+    // Rodo
+    var data = readDynamo(keywordToDynamo);
+    if  ( isFresh(data) ) {
+      summary = data.summary;
+      // set Score on Chart 3 to 'summary' score
+    }
+    else {
+        clientTwitter.get(
+        "search/tweets",
+        { q: keyword, lang: "en", count: "100" },
+        function (error, tweets) {
+            if (error) {
+            console.log("Error: " + error);
+            } else {
+            // console.log("searchTweet", tweets);
+            tweets.statuses.forEach(function (tweet) {
+                socket.emit("searchTweet", {
+                tweet: sentiment.getSentiment(tweet),
+                });
+                console.log("sent Search Tweet");
             });
-
-            console.log("sent Search Tweet");
-          });
+            }
         }
-      }
-    );
+        );
+    }
   });
   
   socket.on("achirveScore", (score) => {
@@ -190,7 +201,7 @@ io.on("connection", (socket) => {
       connections.length
     );
 
-        // --- Rodo ---
+    // --- Rodo ---
     // Write summary to Dynamo as client refresh page =))
     summary = JSON.stringify(summary);
     console.log("summary=====================================", summary);
@@ -201,6 +212,17 @@ io.on("connection", (socket) => {
 
 
 // --- Rodo ---
+
+var isFresh = function(data) { 
+    if (data !== 0) {
+        timeStamp = new Date(data.timeStamp);
+        now = Date().now()
+        return Math.abs(now - timeStamp)/3600/1000 < 24? 1 : 0
+    } else {
+        return 0
+    }
+}
+
 var getDateTime = function () {
   // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
   return new Date().toISOString().slice(0, 19);
@@ -224,5 +246,24 @@ var writeDynamo = function (keyword, summary, timeStamp) {
     }
   });
 };
+
+var readDynamo = function (keyword) {
+    var params = {
+        TableName: table,
+        Key: {
+            "keywords": keyword
+        }
+    };
+    docClient.get(params, function (err, data) {
+        if (err) {
+            console.log("keyword::read::error - " + JSON.stringify(err, null, 2));
+            return 0;
+        }
+        else {
+            console.log("Read: " + JSON.stringify(data, null, 2));
+            return data;
+        }
+    })
+}
 // -----------
 module.exports = { app: app, server: server };

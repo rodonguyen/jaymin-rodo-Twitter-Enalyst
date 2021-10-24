@@ -22,12 +22,12 @@ const options = {
     },
     title: {
       display: true,
-      text: "100 Most Recent Posts Summary",
+      text: "100 Most Recent Posts' Sentiment Score Summary",
     },
   },
 };
 const TotalSearchChart = () => {
-  const { scoreSearchTweet, setAchirveScore } = useContext(TweetContext);
+  const {scoreSearchTweet, setAchirveScore } = useContext(TweetContext);
   const [negativeScore, setNegativeScore] = useState(0);
   const [positiveScore, setPositiveScore] = useState(0);
 
@@ -40,12 +40,14 @@ const TotalSearchChart = () => {
       }
     });
   }, [scoreSearchTweet]);
+
   useEffect(() => {
     setAchirveScore({
       negativeScore: negativeScore,
       positiveScore: positiveScore,
     });
   }, [scoreSearchTweet]);
+
   const data = [negativeScore, positiveScore];
 
 //   console.log("chart=============================", data.negativeScore);

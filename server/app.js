@@ -172,7 +172,7 @@ io.on("connection", (socket) => {
             const resultJSON = JSON.parse(result);
             summary = resultJSON.summary
         }
-        // Get waanted data from DynamoDB
+        // Get wanted data from DynamoDB
         else {
             var data = readDynamo(keywordToStorage);
             if  ( isFresh(data) ) {

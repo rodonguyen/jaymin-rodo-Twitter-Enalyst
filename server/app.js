@@ -72,9 +72,12 @@ app.use(function (err, req, res, next) {
 // --- Rodo ---
 
 var isFresh = function (data) {
+    console.log('your data returned ', data);
   if (data) {
-    const timestamp = new Date(data.timeStamp);
+    const timestamp = new Date(data.Item.timeStamp);
+    console.log('timestamp ', timestamp);
     now = Date.now();
+    console.log('difference ', Math.abs(now - timestamp) / 3600 / 1000 < 24);
     return Math.abs(now - timestamp) / 3600 / 1000 < 24 ? 1 : 0;
   } else {
     return 0;
@@ -208,12 +211,10 @@ io.on("connection", (socket) => {
 
     // Rodo
     readDynamo(keywordToDynamo).then(data => {
-      console.log("d2", data);
-    console.log(isFresh(data))
     
     if (isFresh(data) !== 0) {
+      console.log("Using summary data from DynamoDB");
       summary = data.Item.summary;
-      console.log("summary");
       // set Score on Chart 3 to 'summary' score
       //
       //
@@ -231,7 +232,7 @@ io.on("connection", (socket) => {
               socket.emit("searchTweet", {
                 tweet: sentiment.getSentiment(tweet),
               });
-              console.log("sent Search Tweet");
+              console.log("Sent a Search Tweet from API");
             });
           }
         }
@@ -239,8 +240,6 @@ io.on("connection", (socket) => {
     }
   });
     })
-
-
 
   socket.on("achirveScore", (score) => {
     //Rodo (score from client to store)

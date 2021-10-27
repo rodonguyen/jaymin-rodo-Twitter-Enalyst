@@ -9,7 +9,7 @@ var googleTrends = require("google-trends-api");
 // --- Rodo ---
 var AWS = require("aws-sdk");
 const { env } = require("process");
-var dotenv = require('dotenv');
+var dotenv = require("dotenv");
 dotenv.config();
 
 var awsConfig = {
@@ -69,7 +69,57 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
+// --- Rodo ---
 
+var isFresh = function (data) {
+  if (data) {
+    const timestamp = new Date(data.timeStamp);
+    now = Date.now();
+    return Math.abs(now - timestamp) / 3600 / 1000 < 24 ? 1 : 0;
+  } else {
+    return 0;
+  }
+};
+
+var getDateTime = function () {
+  // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
+  return new Date().toISOString().slice(0, 19);
+};
+
+var writeDynamo = function (keyword, summary, timeStamp) {
+  var input = {
+    keywords: keyword,
+    summary: summary,
+    timeStamp: timeStamp,
+  };
+  var params = {
+    TableName: table,
+    Item: input,
+  };
+  docClient.put(params, function (err, data) {
+    if (err) {
+      console.log(
+        "Write to DynamoDB::error - Could be because new socket starts and summary=null \n" +
+          JSON.stringify(err, null, 2)
+      );
+    } else {
+      console.log("Wrote to DynamoDB: " + JSON.stringify(input));
+    }
+  });
+};
+
+ const readDynamo = async (keyword) => {
+  const params = {
+    TableName: table,
+    Key: {
+      keywords: keyword,
+    },
+  };
+  
+  return await docClient.get(params).promise();
+}
+
+// -----------
 const connections = [];
 io.on("connection", (socket) => {
   socket.emit("your id", socket.id);
@@ -79,8 +129,7 @@ io.on("connection", (socket) => {
     socket.id,
     connections.length
   );
-  // const trend = GetTrendingKeyword();
-  // console.log("trend", trend);
+
   googleTrends.realTimeTrends(
     {
       geo: "AU",
@@ -98,7 +147,6 @@ io.on("connection", (socket) => {
               keyword = keyword.split(" ").join("-");
               result.keyword = keyword;
               socket.emit("trending", result);
-              // console.log("sent", trend);
             });
           }
         });
@@ -114,7 +162,6 @@ io.on("connection", (socket) => {
     keywordToDynamo = keyword;
     console.log("Keyword: %s %s", keywordToDynamo, timer);
     console.log("New Twitter Stream!");
-
     // Start the stream with tracking the keyword
     stream = clientTwitter.stream("statuses/filter", {
       track: keyword,
@@ -127,7 +174,7 @@ io.on("connection", (socket) => {
       counter = counter + 1;
       console.log("streamed");
       clientStream = stream;
-      timeStamp = Date.now();
+      const timeStamp = Date.now();
       console.log("timer:", prevTimestamp + timer);
       console.log("now:", timeStamp);
       // Send Tweet Object to Client
@@ -160,39 +207,45 @@ io.on("connection", (socket) => {
     });
 
     // Rodo
-    var data = readDynamo(keywordToDynamo);
-    if  ( isFresh(data) ) {
-      summary = data.summary;
+    readDynamo(keywordToDynamo).then(data => {
+      console.log("d2", data);
+    console.log(isFresh(data))
+    
+    if (isFresh(data) !== 0) {
+      summary = data.Item.summary;
+      console.log("summary");
       // set Score on Chart 3 to 'summary' score
       //
       //
-      //
-    }
-    else {
-        clientTwitter.get(
+      console.log(summary);
+    } else {
+      clientTwitter.get(
         "search/tweets",
         { q: keyword, lang: "en", count: "100" },
         function (error, tweets) {
-            if (error) {
+          if (error) {
             console.log("Error: " + error);
-            } else {
+          } else {
             // console.log("searchTweet", tweets);
             tweets.statuses.forEach(function (tweet) {
-                socket.emit("searchTweet", {
+              socket.emit("searchTweet", {
                 tweet: sentiment.getSentiment(tweet),
-                });
-                console.log("sent Search Tweet");
+              });
+              console.log("sent Search Tweet");
             });
-            }
+          }
         }
-        );
+      );
     }
   });
-  
+    })
+
+
+
   socket.on("achirveScore", (score) => {
     //Rodo (score from client to store)
     console.log("achirveScore", score);
-    summary = score;  // Rodo
+    summary = score; // Rodo
   });
 
   socket.on("disconnect", () => {
@@ -210,63 +263,6 @@ io.on("connection", (socket) => {
     console.log("summary=====================================", summary);
     writeDynamo(keywordToDynamo, summary, getDateTime());
   });
-
 }); //END io.sockets.on
 
-
-// --- Rodo ---
-
-var isFresh = function(data) { 
-    if (data !== 0) {
-        timeStamp = new Date(data.timeStamp);
-        now = Date().now()
-        return Math.abs(now - timeStamp)/3600/1000 < 24? 1 : 0
-    } else {
-        return 0
-    }
-}
-
-var getDateTime = function () {
-  // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
-  return new Date().toISOString().slice(0, 19);
-};
-
-var writeDynamo = function (keyword, summary, timeStamp) {
-  var input = {
-    keywords: keyword,
-    summary: summary,
-    timeStamp: timeStamp,
-  };
-  var params = {
-    TableName: table,
-    Item: input,
-  };
-  docClient.put(params, function (err, data) {
-    if (err) {
-      console.log("Write to DynamoDB::error - Could be because new socket starts and summary=null \n" + JSON.stringify(err, null, 2));
-    } else {
-      console.log("Wrote to DynamoDB: " + JSON.stringify(input));
-    }
-  });
-};
-
-var readDynamo = function (keyword) {
-    var params = {
-        TableName: table,
-        Key: {
-            "keywords": keyword
-        }
-    };
-    docClient.get(params, function (err, data) {
-        if (err) {
-            console.log("keyword::read::error - " + JSON.stringify(err, null, 2));
-            return 0;
-        }
-        else {
-            console.log("Read: " + JSON.stringify(data, null, 2));
-            return data;
-        }
-    })
-}
-// -----------
 module.exports = { app: app, server: server };

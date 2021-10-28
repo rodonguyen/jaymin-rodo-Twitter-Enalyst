@@ -10,7 +10,7 @@ var googleTrends = require("google-trends-api");
 var AWS = require("aws-sdk");
 var { env } = require("process");
 var redis = require("redis");
-var redisClient = redis.createClient();
+const redisClient = redis.createClient();
 var dotenv = require("dotenv");
 dotenv.config();
 
@@ -74,13 +74,13 @@ app.use(function (err, req, res, next) {
 });
 
 // --- Rodo ---
-const isFresh = function (data) {
+var isFresh = function (data) {
   console.log("isFresh::Your data ", data);
   if (typeof data === "undefined") {
     console.log("isFresh::return 0");
     return 0;
   } else if (data) {
-    const timestamp = new Date(data.timeStamp);
+    var timestamp = new Date(data.timeStamp);
     console.log("isFresh::timestamp ", timestamp);
     now = Date.now();
     console.log(
@@ -93,16 +93,16 @@ const isFresh = function (data) {
   }
 };
 
-const isEmpty = function (obj) {
+var isEmpty = function (obj) {
   return !Object.keys(obj).length;
 };
 
-const getDateTime = function () {
+var getDateTime = function () {
   // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
   return new Date().toISOString().slice(0, 19);
 };
 
-const writeDynamo = function (keyword, summary) {
+var writeDynamo = function (keyword, summary) {
   var input = {
     keywords: keyword,
     summary: summary,
@@ -124,8 +124,8 @@ const writeDynamo = function (keyword, summary) {
   });
 };
 
-const readDynamo = async (keyword) => {
-  const params = {
+var readDynamo = async (keyword) => {
+  var params = {
     TableName: table,
     Key: {
       keywords: keyword,
@@ -135,8 +135,7 @@ const readDynamo = async (keyword) => {
   return await docClient.get(params).promise();
 };
 
-const writeRedis = (redisClient, redisKey, keywordToStorage, summaryString) => {
-  console.log("Writing to Redis");
+var writeRedis = (redisClient, redisKey, keywordToStorage, summaryString) => {
   redisClient.setex(
     redisKey,
     3600,
@@ -147,7 +146,7 @@ const writeRedis = (redisClient, redisKey, keywordToStorage, summaryString) => {
     })
   );
   console.log(
-    "writeRedis::Successfully uploaded data to Redis: ",
+    "Wrote to Redis: ",
     redisKey,
     keywordToStorage,
     summaryString
@@ -190,7 +189,7 @@ io.on("connection", (socket) => {
   );
 
   var keywordToStorage, summary, redisKey; // Rodo declares
-  var useDynamoDB = 0;
+  var useAPI = 0;
   var useStorageSummary = 0;
 
   socket.on("search", (payload) => {
@@ -229,7 +228,7 @@ io.on("connection", (socket) => {
         console.log("Tweet sent");
 
         stream.on("error", function (message) {
-          //   console.log("Ooops! Error: " + message);
+          console.log("Ooops! Error: " + message);
         });
 
         stream.on("limit", function (message) {
@@ -243,14 +242,19 @@ io.on("connection", (socket) => {
       }
     });
 
+    // Persistence ================================================
     console.log("Persistence ---------> Check data in Redis");
-    redisKey = `TwitterEnalyst:${keywordToStorage}`;
-    console.log("Redis key: ", redisKey);
-    redisClient.get(redisKey, (data) => {
-      console.log("Redis::data ", data);
-      if (data) {
+    var redisKey = `TwitterEnalyst:${keywordToStorage}`;
+    redisClient.get(redisKey, (err, result) => {
+        console.log(result)
+      if (result) {
+        const dataJSON = JSON.parse(result);
         console.log("Persistence ---------> Found in Redis");
-        summaryJSON = JSON.parse(data);
+        console.log(dataJSON); // Example {"negativeScore":142,"positiveScore":190}
+
+        
+        // set Score on Chart 3 to 'summary' score
+        // TODO
       }
       // Get wanted data from DynamoDB
       else {
@@ -261,25 +265,28 @@ io.on("connection", (socket) => {
           if (!isEmpty(data)) {
             if (isFresh(data.Item) !== 0) {
               console.log("Persistence ---------> Found in DynamoDB");
-              useDynamoDB = 1;
+              
               useStorageSummary = 1;
               summary = data.Item.summary;
-              console.log(summary, '\n');
-              //   summaryJson = JSON.parse(summary);
+              console.log(summary, "\n"); // Example {"negativeScore":142,"positiveScore":190}
 
               // set Score on Chart 3 to 'summary' score
               // socket.emit("searchTweet", { tweet: { num_score: summaryJson } });
               //
               //
-              // console.log(summaryJson);
+
+
+              console.log("Persistence ---------> Add this data to Redis");
+              writeRedis(redisClient, redisKey, keywordToStorage, summary);
             }
           } else {
             console.log(
-              "Persistence ---------> Not found in DynamoDB. Query data from Twitter API"
-            );
+                "Persistence ---------> Not found in DynamoDB. Query data from Twitter API"
+              );
+            useAPI = 1;
             clientTwitter.get(
               "search/tweets",
-              { q: keyword, lang: "en", count: "100" },
+              { q: keyword, lang: "en", count: "10" },
               function (error, tweets) {
                 if (error) {
                   console.log("Error: " + error);
@@ -301,46 +308,74 @@ io.on("connection", (socket) => {
   });
 
   socket.on("achirveScore", (score) => {
-    if (useStorageSummary === 1) {
-      // Rodo (score from client to store)
-      console.log("achirveScore", score);
-      summary = score; // Rodo
-    }
+    //Rodo (score from client to store)
+    console.log("achirveScore", score);
+    summary = score; // Rodo
   });
 
   socket.on("disconnect", () => {
-    try {
-      connections.splice(connections.indexOf(socket), 1);
-      socket.disconnect();
-      // clientStream.destroy();
-      console.log(
-        "Socket disconnected: %s sockets remaining",
-        connections.length
-      );
-    } catch (e) {
-      console.log(e);
-    }
+    connections.splice(connections.indexOf(socket), 1);
+    socket.disconnect();
+    // clientStream.destroy();
+    console.log(
+      "Socket disconnected: %s sockets remaining",
+      connections.length
+    );
 
     // --- Rodo ---
-    // Write data as client refresh page =))
-    try {
-      if (!useDynamoDB) {
-        summaryString = JSON.stringify(summary);
-        console.log(
-          "=== Write summary to DynamoDB + Redis ===\n",
-          summaryString
-        );
-        writeDynamo(keywordToStorage, summaryString);
-        writeRedis(redisClient, redisKey, keywordToStorage, summaryString);
-        console.log("\n\n***\n\n");
-      }
-    } catch (e) {
-      console.log("Error in trying to write data", e);
+    // Write summary to Dynamo as client refresh page =))
+    if (useAPI) {
+      summaryString = JSON.stringify(summary);
+      console.log("=== Write summary to DynamoDB + Redis ===\n", summaryString);
+      writeDynamo(keywordToStorage, summaryString);
+      writeRedis(redisClient, redisKey, keywordToStorage, summaryString);
     }
+
   });
 }); //END io.sockets.on
 
 module.exports = { app: app, server: server };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
     redisClient.get(redisKey, (error, result) => {

@@ -44,6 +44,7 @@ const TotalSearchChart = () => {
       setPositiveScore(summary100PostScore.positiveScore);
       setNegativeScore(summary100PostScore.negativeScore);
     }
+
   }, [scoreSearchTweet]);
 
   useEffect(() => {

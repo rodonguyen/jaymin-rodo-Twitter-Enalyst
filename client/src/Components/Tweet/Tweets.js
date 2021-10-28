@@ -46,7 +46,7 @@ export default function Tweets() {
       setTimeout(() => {
         setIdTweet((idTweet) => [...idTweet, tweet.id_str]);
         setScoreTweet((scoreTweet) => [...scoreTweet, tweet.num_score]);
-      }, 7000);
+      }, 3000);
     }
   }, [Tweet]);
   useEffect(() => {

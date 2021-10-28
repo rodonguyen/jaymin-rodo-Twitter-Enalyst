@@ -1,6 +1,12 @@
 import React, { useState, useContext } from "react";
 // @material-ui/core components
-import { makeStyles } from "@material-ui/core/styles";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import ReplayIcon from "@mui/icons-material/Replay";
 import {
   FormControl,
   InputLabel,
@@ -8,8 +14,10 @@ import {
   MenuItem,
   OutlinedInput,
   InputAdornment,
+  makeStyles,
 } from "@material-ui/core/";
-// @material-ui/icons
+// nodejs library that concatenates classes
+
 import Search from "@material-ui/icons/Search";
 // core components
 import GridContainer from "../Grid/GridContainer";
@@ -27,7 +35,7 @@ import TotalChart from "../Chart/TotalScoreChart";
 import TotalSearchChart from "../Chart/TotalSearchTweet";
 import styles from "./searchStyles";
 import GoogleTrends from "../TrendingKeyword/GoogleTrending";
-
+import Notification from "../Notification/Notification";
 const useStyles = makeStyles(styles);
 
 const timer = [5, 10, 15, 20, 25, 30];
@@ -64,6 +72,37 @@ export default function SectionLogin() {
           <GridItem xs={12} sm={12} md={4}>
             {loaded ? (
               <div>
+                <div className={classes.noti}>
+                  <Notification />
+                </div>
+                <Box sx={{ flexGrow: 1 }} className={classes.appbar}>
+                  <AppBar position="static" className={classes.appbar}>
+                    <Toolbar>
+                      <IconButton
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="menu"
+                        sx={{ mr: 2 }}
+                      >
+                        <MenuIcon />
+                      </IconButton>
+                      <Typography
+                        variant="h6"
+                        component="div"
+                        sx={{ flexGrow: 1 }}
+                      >
+                        Go back to search bar
+                      </Typography>
+                      <Button
+                        color="primary"
+                        onClick={() => window.location.reload()}
+                      >
+                        <ReplayIcon />
+                      </Button>
+                    </Toolbar>
+                  </AppBar>
+                </Box>
                 <Card>
                   <Chart />
                 </Card>

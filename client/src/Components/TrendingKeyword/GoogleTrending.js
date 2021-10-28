@@ -21,14 +21,18 @@ const GoogleTrends = () => {
           tabContent: (
             <span>
               {googleTrends?.map((keyword, i) => {
-                return (
-                  <Badge
-                    color={color[Math.floor(Math.random() * color.length)]}
-                    key={i}
-                  >
-                    {keyword.keyword}
-                  </Badge>
-                );
+                if (i >= 20) {
+                  return;
+                } else {
+                  return (
+                    <Badge
+                      color={color[Math.floor(Math.random() * color.length)]}
+                      key={i}
+                    >
+                      {keyword.keyword}
+                    </Badge>
+                  );
+                }
               })}
             </span>
           ),

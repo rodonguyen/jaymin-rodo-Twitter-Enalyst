@@ -1,36 +1,36 @@
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
-var http = require("http");
-var socketio = require("socket.io");
-var googleTrends = require("google-trends-api");
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+const http = require("http");
+const socketio = require("socket.io");
+const googleTrends = require("google-trends-api");
 // --- Rodo ---
-var AWS = require("aws-sdk");
+const AWS = require("aws-sdk");
 const { env } = require("process");
-const redis = require('redis');
+const redis = require("redis");
 const redisClient = redis.createClient();
-var dotenv = require('dotenv');
+const dotenv = require("dotenv");
 dotenv.config();
 
-var awsConfig = {
+const awsConfig = {
   region: "ap-southeast-2",
   endpoint: process.env.AWS_ENDPOINT,
   accessKeyId: process.env.AWS_KEYID,
   secretAccessKey: process.env.AWS_SECRETKEY,
 };
 AWS.config.update(awsConfig);
-var docClient = new AWS.DynamoDB.DocumentClient();
-var table = "TwitterEnalyst";
+const docClient = new AWS.DynamoDB.DocumentClient();
+const table = "TwitterEnalyst";
 // ------------
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-var clientTwitter = require("./module/twitter");
-var sentiment = require("./module/sentiment");
-var { timeStamp } = require("console");
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
+const clientTwitter = require("./module/twitter");
+const sentiment = require("./module/sentiment");
+const { timeStamp } = require("console");
 
-var app = express();
+const app = express();
 
 // Create the http server
 const server = require("http").createServer(app);
@@ -72,40 +72,41 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
-// --- Rodo ---
 
-var isFresh = function (data) {
+// --- Rodo ---
+const isFresh = function (data) {
   console.log("isFresh::Your data returned ", data);
-  if ( typeof(data) === 'undefined' || isEmpty(data) ) {
-      console.log('return 0');
-      return 0;
-  }
-  else if (data) {
-    const timestamp = new Date(data.Item.timeStamp);
+  if (typeof data === "undefined") {
+    console.log("isFresh::return 0");
+    return 0;
+  } else if (data) {
+    const timestamp = new Date(data.timeStamp);
     console.log("isFresh::timestamp ", timestamp);
     now = Date.now();
-    console.log("isFresh::check fresh data ", Math.abs(now - timestamp) / 3600 / 1000 < 24);
+    console.log(
+      "isFresh::check fresh data ",
+      Math.abs(now - timestamp) / 3600 / 1000 < 24
+    );
     return Math.abs(now - timestamp) / 3600 / 1000 < 24 ? 1 : 0;
   } else {
     return 0;
   }
 };
 
-var isEmpty = function(obj) {
-    return !Object.keys(obj).length;
-}
+const isEmpty = function (obj) {
+  return !Object.keys(obj).length;
+};
 
-  
-var getDateTime = function () {
+const getDateTime = function () {
   // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
   return new Date().toISOString().slice(0, 19);
 };
 
-var writeDynamo = function (keyword, summary, timeStamp) {
+const writeDynamo = function (keyword, summary) {
   var input = {
     keywords: keyword,
     summary: summary,
-    timeStamp: timeStamp,
+    timeStamp: getDateTime(),
   };
   var params = {
     TableName: table,
@@ -132,6 +133,19 @@ const readDynamo = async (keyword) => {
   };
 
   return await docClient.get(params).promise();
+};
+
+const writeRedis = (redisClient, redisKey, keywordToStorage, summaryString) => {
+  redisClient.setex(
+    redisKey,
+    3600,
+    JSON.stringify({
+      keywords: keywordToStorage,
+      summary: summaryString,
+      timeStamp: getDateTime(),
+    })
+  );
+  console.log("writeRedis::Successfully uploaded data to Redis: " + redisKey);
 };
 
 // -----------
@@ -222,11 +236,10 @@ io.on("connection", (socket) => {
       }
     });
 
-
     // Redisssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
     // Rodo: get data from storage if available
     // Is this redisClient.get() gonna execute constantly cuz it's in socket?
-    redisKey = `TwitterEnalyst:${keywordToStorage}`
+    redisKey = `TwitterEnalyst:${keywordToStorage}`;
     /*
     redisClient.get(redisKey, (error, result) => {
         if (isFresh(result.timeStamp)) {
@@ -272,35 +285,56 @@ io.on("connection", (socket) => {
     });
     */
 
-    readDynamo(keywordToDynamo).then((data) => {
-      if (isFresh(data) !== 0) {
-        console.log("Using 'summary' from DynamoDB for keyword", data.Item.keywords);
-        useDynamoDB = 1;
-        summary = data.Item.summary;
-        summaryJson = JSON.parse(summary);
-        // set Score on Chart 3 to 'summary' score
-        socket.emit("searchTweet", {tweet: {num_score: summaryJson}});
-        // console.log(summaryJson);
-
-      } else {
-        console.log("Using 'summary' from Twitter API");
-        clientTwitter.get(
-          "search/tweets",
-          { q: keyword, lang: "en", count: "100" },
-          function (error, tweets) {
-            if (error) {
-              console.log("Error: " + error);
+    console.log("Persistence ------> Check data in Redis");
+    redisClient.get(redisKey, (data) => {
+      console.log("Redis::data ", data);
+      if (data) {
+        summaryJSON = JSON.parse(data);
+      }
+      // Get wanted data from DynamoDB
+      else {
+        console.log(
+          "Persistence ------> Not found in Redis. Check data in DynamoDB"
+        );
+        readDynamo(keywordToStorage).then((data) => {
+          if (!isEmpty(data)) {
+            if (isFresh(data.Item) !== 0) {
+              console.log(
+                "Using 'summary' from DynamoDB for keyword",
+                data.Item.keywords
+              );
+              useDynamoDB = 1;
+              summary = data.Item.summary;
+              summaryJson = JSON.parse(summary);
+              // set Score on Chart 3 to 'summary' score
+              socket.emit("searchTweet", { tweet: { num_score: summaryJson } });
+              //
+              //
+              // console.log(summaryJson);
             } else {
-              // console.log("searchTweet", tweets);
-              tweets.statuses.forEach(function (tweet) {
-                socket.emit("searchTweet", {
-                  tweet: sentiment.getSentiment(tweet),
-                });
-                console.log("Sent a Search Tweet from API");
-              });
+              console.log(
+                "Persistence ------> Not found in Redis. Query data from Twitter API"
+              );
+              clientTwitter.get(
+                "search/tweets",
+                { q: keyword, lang: "en", count: "100" },
+                function (error, tweets) {
+                  if (error) {
+                    console.log("Error: " + error);
+                  } else {
+                    // console.log("searchTweet", tweets);
+                    tweets.statuses.forEach(function (tweet) {
+                      socket.emit("searchTweet", {
+                        tweet: sentiment.getSentiment(tweet),
+                      });
+                      console.log("Sent a Search Tweet from API");
+                    });
+                  }
+                }
+              );
             }
           }
-        );
+        });
       }
     });
   });
@@ -323,14 +357,12 @@ io.on("connection", (socket) => {
     // --- Rodo ---
     // Write data as client refresh page =))
     if (!useDynamoDB) {
-        summaryString = JSON.stringify(summary);
-        console.log(
-          "=== Write summary to DynamoDB + Redis ===", summaryString);
-        writeDynamo(keywordToDynamo, summaryString, getDateTime());
-        writeRedis(redisClient, redisKey, summaryString);
+      summaryString = JSON.stringify(summary);
+      console.log("=== Write summary to DynamoDB + Redis ===\n", summaryString);
+      writeDynamo(keywordToStorage, summaryString);
+      writeRedis(redisClient, redisKey, keywordToStorage, summaryString);
     }
   });
 }); //END io.sockets.on
-
 
 module.exports = { app: app, server: server };

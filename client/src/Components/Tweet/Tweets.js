@@ -11,7 +11,6 @@ import "./TweetGrid/_plugin-react-slick.scss";
 
 import GridContainer from "./TweetGrid/TweetGridContainer";
 import GridItem from "./TweetGrid/TweetGridItem";
-import Card from "./TweetGrid/TweetCard";
 
 const ENDPOINT = "http://localhost:3000/";
 const socket = io(ENDPOINT, {});
@@ -29,11 +28,11 @@ export default function Tweets() {
     setIdTweet,
     dataRef,
     setScoreTweet,
-    scoreSearchTweet,
     setScoreSearchTweet,
     achirveScore,
     googleTrends,
     setGoogleTrends,
+    setSummary100PostScore
   } = useContext(TweetContext);
 
   const path = { keyword: keyword.input, timer: streamTime.timerStream };
@@ -68,6 +67,13 @@ export default function Tweets() {
               ...ScoreSearchTweet,
               tweets.tweet.num_score,
             ]),
+          3000
+        );
+      });
+      socket.on("DBscore", (score) => {
+        setTimeout(
+          () =>
+            setSummary100PostScore(score),
           3000
         );
       });

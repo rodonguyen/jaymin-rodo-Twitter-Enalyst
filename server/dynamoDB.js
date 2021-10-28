@@ -11,11 +11,11 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 var table = "TwitterEnalyst";
 
 
-var read = function () {
+var readDynamo = function (keyword) {
     var params = {
         TableName: table,
         Key: {
-            "keywords": "cat"
+            "keywords": keyword
         }
     };
     docClient.get(params, function (err, data) {
@@ -55,13 +55,13 @@ var getDateTime = function() {
     return new Date().toISOString().slice(0,19);
 }
 
-var a = new Date('2018-01-17T21:20:00')
-var b = new Date('2018-01-17T22:18:00')
-console.log(Math.abs(b - a)/3600/1000) // safe to use
+var a = new Date('2021-10-27T21:20:00')
+var b = Date.now()
+console.log('Difference:', Math.abs(b - a)/3600/1000) // safe to use
 
 var write = function (keyword, summary, timeStamp) {
     var input = {
-        "keywords": keyword, "Summary": summary, "timeStamp": timeStamp  
+        "keywords": keyword, "summary": summary, "timeStamp": timeStamp  
     };
     var params = {
         TableName: table,

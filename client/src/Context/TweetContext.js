@@ -12,6 +12,7 @@ const TweetProvider = ({ children }) => {
   const [scoreSearchTweet, setScoreSearchTweet] = useState([]);
   const [googleTrends, setGoogleTrends] = useState([]);
   const [achirveScore, setAchirveScore] = useState({});
+  const [summary100PostScore, setSummary100PostScore] = useState({});
   const dataRef = useRef([]);
   // console.log(keyword);
   return (
@@ -36,6 +37,7 @@ const TweetProvider = ({ children }) => {
         setAchirveScore,
         googleTrends,
         setGoogleTrends,
+        summary100PostScore, setSummary100PostScore
       }}
     >
       {children}

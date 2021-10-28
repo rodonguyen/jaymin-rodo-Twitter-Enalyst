@@ -73,9 +73,9 @@ app.use(function (err, req, res, next) {
 
 var isFresh = function (data) {
   console.log("isFresh::Your data returned ", data);
-  if ( typeof(data) === 'undefined' || isEmpty(data) ) {
-      console.log('return 0');
-      return 0;
+  if (typeof (data) === 'undefined' || isEmpty(data)) {
+    console.log('return 0');
+    return 0;
   }
   else if (data) {
     const timestamp = new Date(data.Item.timeStamp);
@@ -88,11 +88,11 @@ var isFresh = function (data) {
   }
 };
 
-var isEmpty = function(obj) {
-    return !Object.keys(obj).length;
+var isEmpty = function (obj) {
+  return !Object.keys(obj).length;
 }
 
-  
+
 var getDateTime = function () {
   // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
   return new Date().toISOString().slice(0, 19);
@@ -112,7 +112,7 @@ var writeDynamo = function (keyword, summary, timeStamp) {
     if (err) {
       console.log(
         "Write to DynamoDB::error - Could be because new socket starts and summary=null \n" +
-          JSON.stringify(err, null, 2)
+        JSON.stringify(err, null, 2)
       );
     } else {
       console.log("Wrote to DynamoDB: " + JSON.stringify(input));
@@ -228,9 +228,7 @@ io.on("connection", (socket) => {
         summary = data.Item.summary;
         summaryJson = JSON.parse(summary);
         // set Score on Chart 3 to 'summary' score
-        socket.emit("searchTweet", {tweet: {num_score: summaryJson}});
-        // console.log(summaryJson);
-
+        socket.emit("DBscore", summaryJson);
       } else {
         console.log("Using 'summary' from Twitter API");
         clientTwitter.get(

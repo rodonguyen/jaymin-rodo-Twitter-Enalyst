@@ -1,39 +1,39 @@
-const createError = require("http-errors");
-const express = require("express");
-const path = require("path");
-const cookieParser = require("cookie-parser");
-const logger = require("morgan");
-const http = require("http");
-const socketio = require("socket.io");
-const googleTrends = require("google-trends-api");
+var createError = require("http-errors");
+var express = require("express");
+var path = require("path");
+var cookieParser = require("cookie-parser");
+var logger = require("morgan");
+var http = require("http");
+var socketio = require("socket.io");
+var googleTrends = require("google-trends-api");
 // --- Rodo ---
-const AWS = require("aws-sdk");
-const { env } = require("process");
-const redis = require("redis");
-const redisClient = redis.createClient();
-const dotenv = require("dotenv");
+var AWS = require("aws-sdk");
+var { env } = require("process");
+var redis = require("redis");
+var redisClient = redis.createClient();
+var dotenv = require("dotenv");
 dotenv.config();
 
-const awsConfig = {
+var awsConfig = {
   region: "ap-southeast-2",
   endpoint: process.env.AWS_ENDPOINT,
   accessKeyId: process.env.AWS_KEYID,
   secretAccessKey: process.env.AWS_SECRETKEY,
 };
 AWS.config.update(awsConfig);
-const docClient = new AWS.DynamoDB.DocumentClient();
-const table = "TwitterEnalyst";
+var docClient = new AWS.DynamoDB.DocumentClient();
+var table = "TwitterEnalyst";
 // ------------
-const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
-const clientTwitter = require("./module/twitter");
-const sentiment = require("./module/sentiment");
-const { timeStamp } = require("console");
+var indexRouter = require("./routes/index");
+var usersRouter = require("./routes/users");
+var clientTwitter = require("./module/twitter");
+var sentiment = require("./module/sentiment");
+var { timeStamp } = require("console");
 
-const app = express();
+var app = express();
 
 // Create the http server
-const server = require("http").createServer(app);
+var server = require("http").createServer(app);
 // Create the Socket IO server on
 // the top of http server
 const io = socketio(server, {
@@ -75,7 +75,7 @@ app.use(function (err, req, res, next) {
 
 // --- Rodo ---
 const isFresh = function (data) {
-  console.log("isFresh::Your data returned ", data);
+  console.log("isFresh::Your data ", data);
   if (typeof data === "undefined") {
     console.log("isFresh::return 0");
     return 0;
@@ -136,6 +136,7 @@ const readDynamo = async (keyword) => {
 };
 
 const writeRedis = (redisClient, redisKey, keywordToStorage, summaryString) => {
+  console.log("Writing to Redis");
   redisClient.setex(
     redisKey,
     3600,
@@ -145,7 +146,12 @@ const writeRedis = (redisClient, redisKey, keywordToStorage, summaryString) => {
       timeStamp: getDateTime(),
     })
   );
-  console.log("writeRedis::Successfully uploaded data to Redis: " + redisKey);
+  console.log(
+    "writeRedis::Successfully uploaded data to Redis: ",
+    redisKey,
+    keywordToStorage,
+    summaryString
+  );
 };
 
 // -----------
@@ -185,6 +191,7 @@ io.on("connection", (socket) => {
 
   var keywordToStorage, summary, redisKey; // Rodo declares
   var useDynamoDB = 0;
+  var useStorageSummary = 0;
 
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
@@ -222,7 +229,7 @@ io.on("connection", (socket) => {
         console.log("Tweet sent");
 
         stream.on("error", function (message) {
-          console.log("Ooops! Error: " + message);
+          //   console.log("Ooops! Error: " + message);
         });
 
         stream.on("limit", function (message) {
@@ -236,11 +243,106 @@ io.on("connection", (socket) => {
       }
     });
 
-    // Redisssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-    // Rodo: get data from storage if available
-    // Is this redisClient.get() gonna execute constantly cuz it's in socket?
+    console.log("Persistence ---------> Check data in Redis");
     redisKey = `TwitterEnalyst:${keywordToStorage}`;
-    /*
+    console.log("Redis key: ", redisKey);
+    redisClient.get(redisKey, (data) => {
+      console.log("Redis::data ", data);
+      if (data) {
+        console.log("Persistence ---------> Found in Redis");
+        summaryJSON = JSON.parse(data);
+      }
+      // Get wanted data from DynamoDB
+      else {
+        console.log(
+          "Persistence ---------> Not found in Redis. Check data in DynamoDB"
+        );
+        readDynamo(keywordToStorage).then((data) => {
+          if (!isEmpty(data)) {
+            if (isFresh(data.Item) !== 0) {
+              console.log("Persistence ---------> Found in DynamoDB");
+              useDynamoDB = 1;
+              useStorageSummary = 1;
+              summary = data.Item.summary;
+              console.log(summary, '\n');
+              //   summaryJson = JSON.parse(summary);
+
+              // set Score on Chart 3 to 'summary' score
+              // socket.emit("searchTweet", { tweet: { num_score: summaryJson } });
+              //
+              //
+              // console.log(summaryJson);
+            }
+          } else {
+            console.log(
+              "Persistence ---------> Not found in DynamoDB. Query data from Twitter API"
+            );
+            clientTwitter.get(
+              "search/tweets",
+              { q: keyword, lang: "en", count: "100" },
+              function (error, tweets) {
+                if (error) {
+                  console.log("Error: " + error);
+                } else {
+                  // console.log("searchTweet", tweets);
+                  tweets.statuses.forEach(function (tweet) {
+                    socket.emit("searchTweet", {
+                      tweet: sentiment.getSentiment(tweet),
+                    });
+                    console.log("Sent a Search Tweet from API");
+                  });
+                }
+              }
+            );
+          }
+        });
+      }
+    });
+  });
+
+  socket.on("achirveScore", (score) => {
+    if (useStorageSummary === 1) {
+      // Rodo (score from client to store)
+      console.log("achirveScore", score);
+      summary = score; // Rodo
+    }
+  });
+
+  socket.on("disconnect", () => {
+    try {
+      connections.splice(connections.indexOf(socket), 1);
+      socket.disconnect();
+      // clientStream.destroy();
+      console.log(
+        "Socket disconnected: %s sockets remaining",
+        connections.length
+      );
+    } catch (e) {
+      console.log(e);
+    }
+
+    // --- Rodo ---
+    // Write data as client refresh page =))
+    try {
+      if (!useDynamoDB) {
+        summaryString = JSON.stringify(summary);
+        console.log(
+          "=== Write summary to DynamoDB + Redis ===\n",
+          summaryString
+        );
+        writeDynamo(keywordToStorage, summaryString);
+        writeRedis(redisClient, redisKey, keywordToStorage, summaryString);
+        console.log("\n\n***\n\n");
+      }
+    } catch (e) {
+      console.log("Error in trying to write data", e);
+    }
+  });
+}); //END io.sockets.on
+
+module.exports = { app: app, server: server };
+
+/*
     redisClient.get(redisKey, (error, result) => {
         if (isFresh(result.timeStamp)) {
             const resultJSON = JSON.parse(result);
@@ -284,85 +386,3 @@ io.on("connection", (socket) => {
         }
     });
     */
-
-    console.log("Persistence ------> Check data in Redis");
-    redisClient.get(redisKey, (data) => {
-      console.log("Redis::data ", data);
-      if (data) {
-        summaryJSON = JSON.parse(data);
-      }
-      // Get wanted data from DynamoDB
-      else {
-        console.log(
-          "Persistence ------> Not found in Redis. Check data in DynamoDB"
-        );
-        readDynamo(keywordToStorage).then((data) => {
-          if (!isEmpty(data)) {
-            if (isFresh(data.Item) !== 0) {
-              console.log(
-                "Using 'summary' from DynamoDB for keyword",
-                data.Item.keywords
-              );
-              useDynamoDB = 1;
-              summary = data.Item.summary;
-              summaryJson = JSON.parse(summary);
-              // set Score on Chart 3 to 'summary' score
-              socket.emit("searchTweet", { tweet: { num_score: summaryJson } });
-              //
-              //
-              // console.log(summaryJson);
-            } else {
-              console.log(
-                "Persistence ------> Not found in Redis. Query data from Twitter API"
-              );
-              clientTwitter.get(
-                "search/tweets",
-                { q: keyword, lang: "en", count: "100" },
-                function (error, tweets) {
-                  if (error) {
-                    console.log("Error: " + error);
-                  } else {
-                    // console.log("searchTweet", tweets);
-                    tweets.statuses.forEach(function (tweet) {
-                      socket.emit("searchTweet", {
-                        tweet: sentiment.getSentiment(tweet),
-                      });
-                      console.log("Sent a Search Tweet from API");
-                    });
-                  }
-                }
-              );
-            }
-          }
-        });
-      }
-    });
-  });
-
-  socket.on("achirveScore", (score) => {
-    //Rodo (score from client to store)
-    console.log("achirveScore", score);
-    summary = score; // Rodo
-  });
-
-  socket.on("disconnect", () => {
-    connections.splice(connections.indexOf(socket), 1);
-    socket.disconnect();
-    // clientStream.destroy();
-    console.log(
-      "Socket disconnected: %s sockets remaining",
-      connections.length
-    );
-
-    // --- Rodo ---
-    // Write data as client refresh page =))
-    if (!useDynamoDB) {
-      summaryString = JSON.stringify(summary);
-      console.log("=== Write summary to DynamoDB + Redis ===\n", summaryString);
-      writeDynamo(keywordToStorage, summaryString);
-      writeRedis(redisClient, redisKey, keywordToStorage, summaryString);
-    }
-  });
-}); //END io.sockets.on
-
-module.exports = { app: app, server: server };

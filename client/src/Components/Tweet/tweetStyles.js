@@ -6,8 +6,14 @@ const tweetStyle = {
   },
   container,
   marginAuto: {
-    marginLeft: "auto !important",
+    marginLeft: "auto",
     marginRight: "auto !important",
+    overflow: "scroll",
+    height: "850px",
+  },
+  tweet: {
+    justifyContent: "center",
+    marginLeft: "5rem",
   },
 };
 

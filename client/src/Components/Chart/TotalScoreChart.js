@@ -33,36 +33,27 @@ const TotalScoreChart = () => {
   useEffect(() => {
     scoreTweet.forEach((x) => {
       if (x >= 0) {
-        setPositiveScore(x + negativeScore);
+        setPositiveScore(x + positiveScore);
       } else {
         setNegativeScore(-x + negativeScore);
       }
     });
   }, [scoreTweet]);
-  const averageScore = (positiveScore + negativeScore) / 2;
-  const sumScore = positiveScore + negativeScore;
-  const data = [negativeScore, positiveScore, sumScore, averageScore];
+  const data = [negativeScore, positiveScore];
   // console.log("chart", data);
   return (
     <div>
       <Bar
         data={{
-          labels: ["Negative", "Positive", "Sum", "Average"],
+          labels: ["Negative", "Positive"],
           datasets: [
             {
               data: data,
               backgroundColor: [
                 "rgba(255, 99, 132, 0.2)",
                 "rgba(75, 192, 192, 0.2)",
-                "rgba(54, 162, 235, 0.2)",
-                "rgba(255, 159, 64, 0.2)",
               ],
-              borderColor: [
-                "rgba(255, 99, 132, 1)",
-                "rgba(75, 192, 192, 1)",
-                "rgba(54, 162, 235, 1)",
-                "rgba(255, 159, 64, 1)",
-              ],
+              borderColor: ["rgba(255, 99, 132, 1)", "rgba(75, 192, 192, 1)"],
               borderWidth: 1,
             },
           ],

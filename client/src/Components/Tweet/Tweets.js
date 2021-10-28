@@ -32,11 +32,13 @@ export default function Tweets() {
     scoreSearchTweet,
     setScoreSearchTweet,
     achirveScore,
+    googleTrends,
+    setGoogleTrends,
   } = useContext(TweetContext);
 
   const path = { keyword: keyword.input, timer: streamTime.timerStream };
   console.log(achirveScore);
-  console.log("id", scoreSearchTweet);
+  console.log("id", googleTrends);
   useEffect(() => {
     const tweet = Tweet;
     if (tweet.num_score !== undefined) {
@@ -45,7 +47,7 @@ export default function Tweets() {
       setTimeout(() => {
         setIdTweet((idTweet) => [...idTweet, tweet.id_str]);
         setScoreTweet((scoreTweet) => [...scoreTweet, tweet.num_score]);
-      }, 7000);
+      }, 3000);
     }
   }, [Tweet]);
   useEffect(() => {
@@ -73,12 +75,12 @@ export default function Tweets() {
   }, [keyword]);
 
   useEffect(() => {
-    socket.emit("achirveScore", achirveScore.averageScore);
+    socket.emit("achirveScore", achirveScore);
   }, [achirveScore]);
 
   useEffect(() => {
     socket.on("trending", (trendingKeyword) => {
-      // console.log("trend", trendingKeyword);
+      setGoogleTrends((googleTrends) => [...googleTrends, trendingKeyword]);
     });
   }, [trendingKeyword]);
   const classes = useStyles();
@@ -89,7 +91,13 @@ export default function Tweets() {
           <GridItem xs={12} sm={12} md={8} className={classes.marginAuto}>
             {idTweet.length ? (
               idTweet.map((id) => {
-                return <TweetEmbed id={id} placeholder={"loading"} />;
+                return (
+                  <TweetEmbed
+                    id={id}
+                    placeholder={"loading"}
+                    className={classes.tweet}
+                  />
+                );
               })
             ) : (
               <div className="tweet-header">

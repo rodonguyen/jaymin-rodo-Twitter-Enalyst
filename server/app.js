@@ -10,9 +10,10 @@ var googleTrends = require("google-trends-api");
 var AWS = require("aws-sdk");
 const { env } = require("process");
 var awsConfig = {
-    "region": "ap-southeast-2",
-    "endpoint": "http://dynamodb.ap-southeast-2.amazonaws.com",
-    "accessKeyId": "AKIAVOMJOYRWD34QPA6S", "secretAccessKey": "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"
+  region: "ap-southeast-2",
+  endpoint: "http://dynamodb.ap-southeast-2.amazonaws.com",
+  accessKeyId: "AKIAVOMJOYRWD34QPA6S",
+  secretAccessKey: "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",
 };
 AWS.config.update(awsConfig);
 var docClient = new AWS.DynamoDB.DocumentClient();
@@ -65,34 +66,6 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-// const GetTrendingKeyword = function () {
-//   const trendingKeyword = [];
-//   googleTrends.realTimeTrends(
-//     {
-//       geo: "AU",
-//       category: "all",
-//     },
-//     function (err, results) {
-//       if (err) {
-//         console.log(err);
-//       } else {
-//         const trends = JSON.parse(results);
-//         trends.storySummaries.trendingStories.forEach((trend) => {
-//           const result = {};
-//           if (trend.entityNames.length >= 1) {
-//             trend.entityNames.forEach((keyword) => {
-//               keyword = keyword.split(" ").join("-");
-//               result.keyword = keyword;
-//               trendingKeyword.push(result);
-//             });
-//           }
-//         });
-//       }
-//     }
-//   );
-//   return trendingKeyword;
-// };
-
 const connections = [];
 io.on("connection", (socket) => {
   socket.emit("your id", socket.id);
@@ -131,8 +104,11 @@ io.on("connection", (socket) => {
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
     const timer = payload.timer * 1000;
-//Write Dynamo here (Rodo)
-    write(keyword, '', getDateTime());
+    //Write keyword to Dynamo there (Rodo)
+    console.log("Keyword: %s %s", keyword, timer);
+
+    //Write Dynamo here (Rodo)
+    write(keyword, "", getDateTime());
 
     console.log("Keyword: %s %s", keyword, timer);
     console.log("New Twitter Stream!");
@@ -201,6 +177,7 @@ io.on("connection", (socket) => {
     );
   });
   socket.on("achirveScore", (score) => {
+    //Rodo (score from client to store)
     console.log("achirveScore", score);
   });
   socket.on("disconnect", () => {
@@ -214,28 +191,29 @@ io.on("connection", (socket) => {
   });
 }); //END io.sockets.on
 
-
 // --- Rodo ---
-var getDateTime = function() {
-    // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
-    return new Date().toISOString().slice(0,19);
-}
+var getDateTime = function () {
+  // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
+  return new Date().toISOString().slice(0, 19);
+};
 
 var write = function (keyword, summary, timeStamp) {
-    var input = {
-        "keywords": keyword, "Summary": summary, "timeStamp": timeStamp  
-    };
-    var params = {
-        TableName: table,
-        Item:  input
-    };
-    docClient.put(params, function (err, data) {
-        if (err) {
-            console.log("keyword::write::error - " + JSON.stringify(err, null, 2));                      
-        } else {
-            console.log("Wrote to DynamoDB: " + JSON.stringify(input) );                      
-        }
-    });
-}
+  var input = {
+    keywords: keyword,
+    Summary: summary,
+    timeStamp: timeStamp,
+  };
+  var params = {
+    TableName: table,
+    Item: input,
+  };
+  docClient.put(params, function (err, data) {
+    if (err) {
+      console.log("keyword::write::error - " + JSON.stringify(err, null, 2));
+    } else {
+      console.log("Wrote to DynamoDB: " + JSON.stringify(input));
+    }
+  });
+};
 // -----------
 module.exports = { app: app, server: server };

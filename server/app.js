@@ -321,17 +321,15 @@ io.on("connection", (socket) => {
     );
 
     // --- Rodo ---
-    // Write summary to Dynamo as client refresh page =))
+    // Write data as client refresh page =))
     if (!useDynamoDB) {
         summaryString = JSON.stringify(summary);
         console.log(
-          "summary=====================================", summaryString);
+          "=== Write summary to DynamoDB + Redis ===", summaryString);
         writeDynamo(keywordToDynamo, summaryString, getDateTime());
         writeRedis(redisClient, redisKey, summaryString);
     }
-      
   });
-
 }); //END io.sockets.on
 
 

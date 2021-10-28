@@ -7,7 +7,7 @@ import { TweetContext } from "../../Context/TweetContext";
 Chart.register(StreamingPlugin);
 
 const Chartjs = () => {
-  const { keyword, streamTime, sentimentScore, timeStamp, dataRef } =
+  const { dataRef } =
     useContext(TweetContext);
 
   return (
@@ -32,7 +32,7 @@ const Chartjs = () => {
             x: {
               type: "realtime",
               realtime: {
-                delay: 0,
+                delay: 300,
               },
             },
             y: {

@@ -36,8 +36,6 @@ export default function Tweets() {
   } = useContext(TweetContext);
 
   const path = { keyword: keyword.input, timer: streamTime.timerStream };
-  console.log(achirveScore);
-  console.log("id", googleTrends);
   useEffect(() => {
     const tweet = Tweet;
     if (tweet.num_score !== undefined) {
@@ -57,18 +55,14 @@ export default function Tweets() {
           socket.on("sendTweet", (receivedTweet) => {
             setTweet(receivedTweet.tweet);
           }),
-        3000
+        1000
       );
 
       socket.on("searchTweet", (tweets) => {
-        setTimeout(
-          () =>
-            setScoreSearchTweet((ScoreSearchTweet) => [
-              ...ScoreSearchTweet,
-              tweets.tweet.num_score,
-            ]),
-          3000
-        );
+        setScoreSearchTweet((ScoreSearchTweet) => [
+          ...ScoreSearchTweet,
+          tweets.tweet.num_score,
+        ])
       });
       socket.on("DBscore", (score) => {
         setTimeout(

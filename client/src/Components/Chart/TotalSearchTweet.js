@@ -30,13 +30,14 @@ const TotalSearchChart = () => {
   const { scoreSearchTweet, setAchirveScore, summary100PostScore } = useContext(TweetContext);
   const [negativeScore, setNegativeScore] = useState(0);
   const [positiveScore, setPositiveScore] = useState(0);
+
   useEffect(() => {
     if (scoreSearchTweet.length > 0) {
       scoreSearchTweet.forEach((x) => {
         if (x >= 0) {
-          setPositiveScore(positiveScore + x);
+          setPositiveScore(x + positiveScore);
         } else {
-          setNegativeScore(negativeScore - x);
+          setNegativeScore(-x + negativeScore);
         }
       })
     }
@@ -45,7 +46,7 @@ const TotalSearchChart = () => {
       setNegativeScore(summary100PostScore.negativeScore);
     }
 
-  }, [scoreSearchTweet]);
+  }, [scoreSearchTweet, summary100PostScore]);
 
   useEffect(() => {
     setAchirveScore({
@@ -55,7 +56,6 @@ const TotalSearchChart = () => {
   }, [scoreSearchTweet]);
 
   const data = [negativeScore, positiveScore];
-  console.log("data", data);
   return (
     <div>
       <Bar

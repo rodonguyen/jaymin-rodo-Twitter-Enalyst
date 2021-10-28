@@ -72,18 +72,27 @@ app.use(function (err, req, res, next) {
 // --- Rodo ---
 
 var isFresh = function (data) {
-    console.log('your data returned ', data);
-  if (data) {
+  console.log("isFresh::Your data returned ", data);
+  if ( typeof(data) === 'undefined' || isEmpty(data) ) {
+      console.log('return 0');
+      return 0;
+  }
+  else if (data) {
     const timestamp = new Date(data.Item.timeStamp);
-    console.log('timestamp ', timestamp);
+    console.log("isFresh::timestamp ", timestamp);
     now = Date.now();
-    console.log('difference ', Math.abs(now - timestamp) / 3600 / 1000 < 24);
+    console.log("isFresh::check fresh data ", Math.abs(now - timestamp) / 3600 / 1000 < 24);
     return Math.abs(now - timestamp) / 3600 / 1000 < 24 ? 1 : 0;
   } else {
     return 0;
   }
 };
 
+var isEmpty = function(obj) {
+    return !Object.keys(obj).length;
+}
+
+  
 var getDateTime = function () {
   // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
   return new Date().toISOString().slice(0, 19);
@@ -111,16 +120,16 @@ var writeDynamo = function (keyword, summary, timeStamp) {
   });
 };
 
- const readDynamo = async (keyword) => {
+const readDynamo = async (keyword) => {
   const params = {
     TableName: table,
     Key: {
       keywords: keyword,
     },
   };
-  
+
   return await docClient.get(params).promise();
-}
+};
 
 // -----------
 const connections = [];
@@ -158,6 +167,8 @@ io.on("connection", (socket) => {
   );
 
   var keywordToDynamo, summary; // Rodo declares
+  var useDynamoDB = 0;
+
 
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
@@ -210,36 +221,38 @@ io.on("connection", (socket) => {
     });
 
     // Rodo
-    readDynamo(keywordToDynamo).then(data => {
-    
-    if (isFresh(data) !== 0) {
-      console.log("Using summary data from DynamoDB");
-      summary = data.Item.summary;
-      // set Score on Chart 3 to 'summary' score
-      //
-      //
-      console.log(summary);
-    } else {
-      clientTwitter.get(
-        "search/tweets",
-        { q: keyword, lang: "en", count: "100" },
-        function (error, tweets) {
-          if (error) {
-            console.log("Error: " + error);
-          } else {
-            // console.log("searchTweet", tweets);
-            tweets.statuses.forEach(function (tweet) {
-              socket.emit("searchTweet", {
-                tweet: sentiment.getSentiment(tweet),
+    readDynamo(keywordToDynamo).then((data) => {
+      if (isFresh(data) !== 0) {
+        console.log("Using 'summary' from DynamoDB for keyword", data.Item.keywords);
+        useDynamoDB = 1;
+        summary = data.Item.summary;
+        summaryJson = JSON.parse(summary);
+        // set Score on Chart 3 to 'summary' score
+        socket.emit("searchTweet", {tweet: {num_score: summaryJson}});
+        // console.log(summaryJson);
+
+      } else {
+        console.log("Using 'summary' from Twitter API");
+        clientTwitter.get(
+          "search/tweets",
+          { q: keyword, lang: "en", count: "100" },
+          function (error, tweets) {
+            if (error) {
+              console.log("Error: " + error);
+            } else {
+              // console.log("searchTweet", tweets);
+              tweets.statuses.forEach(function (tweet) {
+                socket.emit("searchTweet", {
+                  tweet: sentiment.getSentiment(tweet),
+                });
+                console.log("Sent a Search Tweet from API");
               });
-              console.log("Sent a Search Tweet from API");
-            });
+            }
           }
-        }
-      );
-    }
+        );
+      }
+    });
   });
-    })
 
   socket.on("achirveScore", (score) => {
     //Rodo (score from client to store)
@@ -258,9 +271,14 @@ io.on("connection", (socket) => {
 
     // --- Rodo ---
     // Write summary to Dynamo as client refresh page =))
-    summary = JSON.stringify(summary);
-    console.log("summary=====================================", summary);
-    writeDynamo(keywordToDynamo, summary, getDateTime());
+    if (!useDynamoDB) {
+      summaryString = JSON.stringify(summary);
+      console.log(
+        "summary=====================================",
+        summaryString
+      );
+      writeDynamo(keywordToDynamo, summaryString, getDateTime());
+    }
   });
 }); //END io.sockets.on
 

@@ -112,10 +112,10 @@ var writeDynamo = function (keyword, summary) {
     TableName: table,
     Item: input,
   };
-  docClient.put(params, function (err, data) {
+  docClient.put(params, function (err) {
     if (err) {
       console.log(
-        "Write to DynamoDB::error - Could be because new socket starts and summary=null \n" +
+        "Write to DynamoDB::error - Could be because new socket starts and summary=null\n" +
           JSON.stringify(err, null, 2)
       );
     } else {
@@ -136,6 +136,7 @@ var readDynamo = async (keyword) => {
 };
 
 var writeRedis = (redisClient, redisKey, keywordToStorage, summaryString) => {
+    console.log("Writing to Redis: ", redisKey, keywordToStorage, summaryString);
   redisClient.setex(
     redisKey,
     3600,
@@ -144,12 +145,6 @@ var writeRedis = (redisClient, redisKey, keywordToStorage, summaryString) => {
       summary: summaryString,
       timeStamp: getDateTime(),
     })
-  );
-  console.log(
-    "Wrote to Redis: ",
-    redisKey,
-    keywordToStorage,
-    summaryString
   );
 };
 
@@ -191,6 +186,7 @@ io.on("connection", (socket) => {
   var keywordToStorage, summary, redisKey; // Rodo declares
   var useAPI = 0;
   var useStorageSummary = 0;
+  var redisKey;
 
   socket.on("search", (payload) => {
     const keyword = payload.keyword;
@@ -244,15 +240,14 @@ io.on("connection", (socket) => {
 
     // Persistence ================================================
     console.log("Persistence ---------> Check data in Redis");
-    var redisKey = `TwitterEnalyst:${keywordToStorage}`;
+    redisKey = `TwitterEnalyst:${keywordToStorage}`;
     redisClient.get(redisKey, (err, result) => {
-        console.log(result)
+      console.log(result);
       if (result) {
         const dataJSON = JSON.parse(result);
         console.log("Persistence ---------> Found in Redis");
         console.log(dataJSON); // Example {"negativeScore":142,"positiveScore":190}
 
-        
         // set Score on Chart 3 to 'summary' score
         // TODO
       }
@@ -265,7 +260,7 @@ io.on("connection", (socket) => {
           if (!isEmpty(data)) {
             if (isFresh(data.Item) !== 0) {
               console.log("Persistence ---------> Found in DynamoDB");
-              
+
               useStorageSummary = 1;
               summary = data.Item.summary;
               console.log(summary, "\n"); // Example {"negativeScore":142,"positiveScore":190}
@@ -275,14 +270,13 @@ io.on("connection", (socket) => {
               //
               //
 
-
               console.log("Persistence ---------> Add this data to Redis");
               writeRedis(redisClient, redisKey, keywordToStorage, summary);
             }
           } else {
             console.log(
-                "Persistence ---------> Not found in DynamoDB. Query data from Twitter API"
-              );
+              "Persistence ---------> Not found in DynamoDB. Query data from Twitter API"
+            );
             useAPI = 1;
             clientTwitter.get(
               "search/tweets",
@@ -323,101 +317,17 @@ io.on("connection", (socket) => {
     );
 
     // --- Rodo ---
-    // Write summary to Dynamo as client refresh page =))
+    // Write summary to Dynamo + Redis when client refreshes page
     if (useAPI) {
       summaryString = JSON.stringify(summary);
-      console.log("=== Write summary to DynamoDB + Redis ===\n", summaryString);
+      console.log(
+        "=== Write summary to DynamoDB + Redis ===\nSummary: ",
+        summaryString
+      );
       writeDynamo(keywordToStorage, summaryString);
       writeRedis(redisClient, redisKey, keywordToStorage, summaryString);
     }
-
   });
 }); //END io.sockets.on
 
 module.exports = { app: app, server: server };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-    redisClient.get(redisKey, (error, result) => {
-        if (isFresh(result.timeStamp)) {
-            const resultJSON = JSON.parse(result);
-            summary = resultJSON.summary
-        }
-        // Get wanted data from DynamoDB
-        else {
-            var data = readDynamo(keywordToStorage);
-            if  ( isFresh(data) ) {
-              summary = data.summary;
-              // set Score on Chart 3 to 'summary' score
-              //
-              // store 'summary' in Redis here?
-              // redisClient.setex(
-                //     redisKey,
-                //     3600,
-                //     JSON.stringify({ source: "Redis Cache", ...?summary and datetime? })
-                // );
-                // console.log("Successfully uploaded data to Redis " + redisKey);
-            }
-            // Get new data since there's no wanted data from the storages
-            else {
-                clientTwitter.get(
-                "search/tweets",
-                { q: keyword, lang: "en", count: "100" },
-                function (error, tweets) {
-                    if (error) {
-                    console.log("Error: " + error);
-                    } else {
-                    // console.log("searchTweet", tweets);
-                    tweets.statuses.forEach(function (tweet) {
-                        socket.emit("searchTweet", {
-                        tweet: sentiment.getSentiment(tweet),
-                        });
-                        console.log("sent Search Tweet");
-                    });
-                    }
-                }
-                );
-            }
-        }
-    });
-    */

@@ -8,57 +8,77 @@ import Warning from "@material-ui/icons/Warning";
 import SnackbarContent from "../Snackbar/SnackbarContent.js";
 
 import styles from "./notificationStyles.js";
+import { alertClasses } from "@mui/material";
 
 const useStyles = makeStyles(styles);
 
-export default function SectionNotifications() {
+export default function SectionNotifications({ status }) {
+  const notiStatus = (status) => {
+    switch (status) {
+      case "success":
+        return (
+          <SnackbarContent
+            message={
+              <span>
+                <b>SUCCESS ALERT:</b> Search successful, getting data from the API
+              </span>
+            }
+            close
+            color="success"
+            icon={Check}
+          />
+        );
+      case "warning":
+        return (
+          <SnackbarContent
+            message={
+              <span>
+                <b>WARNING ALERT:</b> You{"'"}ve got some friends nearby, stop
+                looking at your phone and find them...
+              </span>
+            }
+            close
+            color="warning"
+            icon={Warning}
+          />
+        )
+      case "error":
+        return (
+          <SnackbarContent
+            message={
+              <span>
+                <b>DANGER ALERT:</b> You{"'"}ve got some friends nearby, stop
+                looking at your phone and find them...
+              </span>
+            }
+            close
+            color="danger"
+            icon="info_outline"
+          />
+        )
+      case "info":
+        return (
+          <SnackbarContent
+            message={
+              <span>
+                <b>INFO ALERT:</b> You{"'"}ve got some friends nearby, stop looking
+                at your phone and find them...
+              </span>
+            }
+            close
+            color="info"
+            icon="info_outline"
+          />
+        )
+    }
+  }
   const classes = useStyles();
   return (
     <div className={classes.section} id="notifications">
       <div className={classes.container}> </div>
-      {/* <SnackbarContent
-        message={
-          <span>
-            <b>INFO ALERT:</b> You{"'"}ve got some friends nearby, stop looking
-            at your phone and find them...
-          </span>
-        }
-        close
-        color="info"
-        icon="info_outline"
-      /> */}
-      <SnackbarContent
-        message={
-          <span>
-            <b>SUCCESS ALERT:</b> Search successful, getting data from the API
-          </span>
-        }
-        close
-        color="success"
-        icon={Check}
-      />
-      {/* <SnackbarContent
-        message={
-          <span>
-            <b>WARNING ALERT:</b> You{"'"}ve got some friends nearby, stop
-            looking at your phone and find them...
-          </span>
-        }
-        close
-        color="warning"
-        icon={Warning}
-      /> */}
-      {/* <SnackbarContent
-        message={
-          <span>
-            <b>DANGER ALERT:</b> You{"'"}ve got some friends nearby, stop
-            looking at your phone and find them...
-          </span>
-        }
-        close
-        color="danger"
-        icon="info_outline"
-      />     */}
+      {
+        notiStatus(status)
+      }
     </div>
   );
 }

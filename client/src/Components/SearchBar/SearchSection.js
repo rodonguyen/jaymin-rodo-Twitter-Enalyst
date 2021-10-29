@@ -29,22 +29,19 @@ import CardFooter from "../Card/CardFooter.js";
 import Button from "../CustomButtons/Button";
 import CustomInput from "../CustomInput/CustomInput";
 import { TweetContext } from "../../Context/TweetContext";
-import Tweet from "../Tweet/Tweets";
-import Chart from "../Chart/lineChart";
-import TotalChart from "../Chart/TotalScoreChart";
 import TotalSearchChart from "../Chart/TotalSearchTweet";
 import styles from "./searchStyles";
 import GoogleTrends from "../TrendingKeyword/GoogleTrending";
 import Notification from "../Notification/Notification";
 const useStyles = makeStyles(styles);
 
-const timer = [5, 10, 15, 20, 25, 30];
+const timer = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
 export default function SectionLogin() {
   const classes = useStyles();
-  const [timerStream, getTimerStream] = useState([]);
+  const [timerStream, getTimerStream] = useState();
   const [loaded, setLoaded] = useState(false);
-  const { keyword, setKeyword, streamTime, setStreamTime } =
+  const { keyword, setKeyword, streamTime, setStreamTime, tweetAlert } =
     useContext(TweetContext);
   const [input, setInput] = useState();
 
@@ -53,10 +50,16 @@ export default function SectionLogin() {
   };
   const inputSearch = () => {
     if (!input) {
-      console.log("!input");
+      alert("Missing keyword");
       return;
-    } else if (!timerStream) {
-      console.log(!timerStream);
+    }
+    if (!timerStream) {
+      alert("Missing timer for streaming");
+      return;
+    }
+    const arr = input.trim().split(" ");
+    if (arr.length !== 1) {
+      alert("ony can search for one word")
       return;
     }
     setStreamTime({ timerStream });
@@ -64,6 +67,7 @@ export default function SectionLogin() {
     setLoaded(true);
     console.log(keyword);
     console.log(streamTime);
+
   };
   return (
     <div className={classes.section}>
@@ -73,7 +77,7 @@ export default function SectionLogin() {
             {loaded ? (
               <div>
                 <div className={classes.noti}>
-                  <Notification />
+                  <Notification status={"success"} />
                 </div>
                 <Box sx={{ flexGrow: 1 }} className={classes.appbar}>
                   <AppBar position="static" className={classes.appbar}>
@@ -104,12 +108,6 @@ export default function SectionLogin() {
                   </AppBar>
                 </Box>
                 <Card>
-                  <Chart />
-                </Card>
-                <Card>
-                  <TotalChart />
-                </Card>
-                <Card>
                   <TotalSearchChart />
                 </Card>
               </div>
@@ -122,7 +120,7 @@ export default function SectionLogin() {
                     </CardHeader>
                     <CardBody>
                       <CustomInput
-                        labelText="search keyword..."
+                        labelText="search one keyword..."
                         id="first"
                         formControlProps={{
                           fullWidth: true,
@@ -140,14 +138,14 @@ export default function SectionLogin() {
                     </CardBody>
                     <p className={classes.divider}>
                       {" "}
-                      Select the duration of stream:
+                      Select the number of tweets:
                     </p>
                     <FormControl fullWidth className={classes.selectTimer}>
                       <InputLabel
                         id="timer-stream"
                         className={classes.inputLabel}
                       >
-                        second
+                        number
                       </InputLabel>
                       <Select
                         labelId="timer-stream"

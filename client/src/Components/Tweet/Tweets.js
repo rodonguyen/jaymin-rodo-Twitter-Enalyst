@@ -11,6 +11,8 @@ import "./TweetGrid/_plugin-react-slick.scss";
 
 import GridContainer from "./TweetGrid/TweetGridContainer";
 import GridItem from "./TweetGrid/TweetGridItem";
+import { getSearchTwitter } from '../../Services/GetSearchTwitter'
+import { getTrendingKeyword } from '../../Services/GetTrendingKeyword'
 
 const ENDPOINT = "http://localhost:3000/";
 const socket = io(ENDPOINT, {});
@@ -30,59 +32,77 @@ export default function Tweets() {
     setScoreTweet,
     setScoreSearchTweet,
     achirveScore,
-    googleTrends,
     setGoogleTrends,
-    setSummary100PostScore
+    setSummary100PostScore,
+    setTweetAlert,
   } = useContext(TweetContext);
 
   const path = { keyword: keyword.input, timer: streamTime.timerStream };
-  useEffect(() => {
-    const tweet = Tweet;
-    if (tweet.num_score !== undefined) {
-      const now = Date.now();
-      dataRef.current.push({ x: now, y: tweet.num_score });
-      setTimeout(() => {
-        setIdTweet((idTweet) => [...idTweet, tweet.id_str]);
-        setScoreTweet((scoreTweet) => [...scoreTweet, tweet.num_score]);
-      }, 3000);
-    }
-  }, [Tweet]);
+  console.log("id", idTweet)
   useEffect(() => {
     if (keyword.input) {
-      socket.emit("search", path);
-      setTimeout(
-        () =>
-          socket.on("sendTweet", (receivedTweet) => {
-            setTweet(receivedTweet.tweet);
-          }),
-        1000
-      );
-
-      socket.on("searchTweet", (tweets) => {
-        setScoreSearchTweet((ScoreSearchTweet) => [
-          ...ScoreSearchTweet,
-          tweets.tweet.num_score,
-        ])
-      });
-      socket.on("DBscore", (score) => {
-        setTimeout(
-          () =>
-            setSummary100PostScore(score),
-          3000
-        );
-      });
+      getSearchTwitter(keyword.input, streamTime.timerStream)
+        .then((res) => {
+          const data = res.data.data;
+          console.log(data);
+          res.data.data.forEach(tweet => setIdTweet((idTweet) => [...idTweet, tweet.id_str]))
+          res.data.data.forEach(tweet => setScoreSearchTweet((scoreTweet) => [...scoreTweet, tweet.num_score]))
+        })
+        .catch((err) => console.log(err));
     }
-  }, [keyword]);
-
+  }, [keyword])
   useEffect(() => {
-    socket.emit("achirveScore", achirveScore);
-  }, [achirveScore]);
+    getTrendingKeyword().then(res => {
+      setGoogleTrends(res)
+      console.log(res);
+    })
+  }, [])
+  // useEffect(() => {
+  //   const tweet = Tweet;
+  //   if (tweet.num_score !== undefined) {
+  //     const now = Date.now();
+  //     dataRef.current.push({ x: now, y: tweet.num_score });
+  //     setTimeout(() => {
+  //       setIdTweet((idTweet) => [...idTweet, tweet.id_str]);
+  //       setScoreTweet((scoreTweet) => [...scoreTweet, tweet.num_score]);
+  //     }, 3000);
+  //   } else {
+  //     setTweetAlert(true);
+  //   }
+  // }, [Tweet]);
+  // useEffect(() => {
+  //   if (keyword.input) {
+  //     socket.emit("search", path);
+  //     setTimeout(
+  //       () =>
+  //         socket.on("sendTweet", (receivedTweet) => {
+  //           setTweet(receivedTweet.tweet);
+  //         }),
+  //       1000
+  //     );
 
-  useEffect(() => {
-    socket.on("trending", (trendingKeyword) => {
-      setGoogleTrends((googleTrends) => [...googleTrends, trendingKeyword]);
-    });
-  }, [trendingKeyword]);
+  //     socket.on("searchTweet", (tweets) => {
+  //       setScoreSearchTweet((ScoreSearchTweet) => [
+  //         ...ScoreSearchTweet,
+  //         tweets.tweet.num_score,
+  //       ])
+  //     });
+
+  //     socket.on("DBscore", (score) => {
+  //       setSummary100PostScore(score)
+  //     })
+  //   }
+  // }, [keyword]);
+
+  // useEffect(() => {
+  //   socket.emit("achirveScore", achirveScore);
+  // }, [achirveScore]);
+
+  // useEffect(() => {
+  //   socket.on("trending", (trendingKeyword) => {
+  //     setGoogleTrends((googleTrends) => [...googleTrends, trendingKeyword]);
+  //   });
+  // }, [trendingKeyword]);
   const classes = useStyles();
   return (
     <div className={classes.section}>
@@ -90,14 +110,16 @@ export default function Tweets() {
         <GridContainer>
           <GridItem xs={12} sm={12} md={8} className={classes.marginAuto}>
             {idTweet.length ? (
-              idTweet.map((id) => {
-                return (
-                  <TweetEmbed
-                    id={id}
-                    placeholder={"loading"}
-                    className={classes.tweet}
-                  />
-                );
+              idTweet.map((id, key) => {
+                if (key < 20) {
+                  return (
+                    <TweetEmbed
+                      id={id}
+                      placeholder={"loading"}
+                      className={classes.tweet}
+                    />
+                  );
+                }
               })
             ) : (
               <div className="tweet-header">

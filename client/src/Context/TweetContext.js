@@ -11,6 +11,7 @@ const TweetProvider = ({ children }) => {
   const [scoreTweet, setScoreTweet] = useState([]);
   const [scoreSearchTweet, setScoreSearchTweet] = useState([]);
   const [googleTrends, setGoogleTrends] = useState([]);
+  const [userTrend, setUserTrend] = useState([]);
   const [achirveScore, setAchirveScore] = useState({});
   const [summary100PostScore, setSummary100PostScore] = useState({});
   const [tweetAlert, setTweetAlert] = useState(false);
@@ -41,6 +42,7 @@ const TweetProvider = ({ children }) => {
         summary100PostScore, setSummary100PostScore,
         tweetAlert,
         setTweetAlert,
+        userTrend, setUserTrend
       }}
     >
       {children}

@@ -2,9 +2,7 @@
 var express = require('express');
 var router = express.Router();
 const Twitter = require("twitter");
-var AWS = require("aws-sdk");
 var { getSentiment } = require("../module/sentiment")
-require("dotenv").config();
 // --- Rodo ---
 var AWS = require("aws-sdk");
 const { env } = require("process");
@@ -44,7 +42,9 @@ var checkData = function (data,count) {
     //     return 0;
     // }
     else if (data) {
-        const timestamp = new Date(JSON.parse(data).timeStamp);
+        console.log(typeof(data.timeStamp));
+        console.log((data.timeStamp));
+        var timestamp = new Date(data.timeStamp);
         console.log("checkData::timestamp ", timestamp);
         now = Date.now();
         console.log("checkData::check fresh data ", Math.abs(now - timestamp) / 3600 / 1000 < 24);
@@ -118,7 +118,7 @@ router.get('/', async (req, res) => {
 
     console.log( "Persistence ---------> Check data in Redis");
     redisClient.get(`TwitterEnalyst:${keyword}`, (err, result) => {
-        if (result && checkData(result,count)) {
+        if (result && checkData(JSON.parse(result),count)) {
             // const dataJSON = JSON.parse(result);
             console.log("Persistence ---------> Found in Redis");
             console.log(result);
@@ -135,7 +135,6 @@ router.get('/', async (req, res) => {
             console.log( "Persistence ---------> Not found in Redis");
             console.log( "Persistence ---------> Check data in DynamoDB");
             readDynamo(keyword).then((data) => {
-                console.log(data);
                 if (checkData(data.Item, count) !== 0) {
                     console.log("Persistence ---------> Found in DynamoDB");
                     result = data.Item.result;

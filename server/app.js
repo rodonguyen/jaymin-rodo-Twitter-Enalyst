@@ -25,6 +25,7 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var twitterRouter = require("./routes/twitter");
 var googleTrendRouter = require("./routes/googleTrend")
+var myTrendRouter = require("./routes/myTrend")
 const { timeStamp } = require("console");
 var app = express();
 
@@ -54,80 +55,81 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/twitter", twitterRouter);
 app.use("/googleTrend", googleTrendRouter);
+app.use("/myTrend", myTrendRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  next(createError(404));
+    next(createError(404));
 });
 
 // error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get("env") === "development" ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render("error");
+    // render the error page
+    res.status(err.status || 500);
+    res.render("error");
 });
 
 // --- Rodo ---
 
 var isFresh = function (data) {
-  console.log("isFresh::Your data returned ", data);
-  if (typeof (data) === 'undefined' || isEmpty(data)) {
-    console.log('return 0');
-    return 0;
-  }
-  else if (data) {
-    const timestamp = new Date(data.Item.timeStamp);
-    console.log("isFresh::timestamp ", timestamp);
-    now = Date.now();
-    console.log("isFresh::check fresh data ", Math.abs(now - timestamp) / 3600 / 1000 < 24);
-    return Math.abs(now - timestamp) / 3600 / 1000 < 24 ? 1 : 0;
-  } else {
-    return 0;
-  }
+    console.log("isFresh::Your data returned ", data);
+    if (typeof (data) === 'undefined' || isEmpty(data)) {
+        console.log('return 0');
+        return 0;
+    }
+    else if (data) {
+        const timestamp = new Date(data.Item.timeStamp);
+        console.log("isFresh::timestamp ", timestamp);
+        now = Date.now();
+        console.log("isFresh::check fresh data ", Math.abs(now - timestamp) / 3600 / 1000 < 24);
+        return Math.abs(now - timestamp) / 3600 / 1000 < 24 ? 1 : 0;
+    } else {
+        return 0;
+    }
 };
 
 var isEmpty = function (obj) {
-  return !Object.keys(obj).length;
+    return !Object.keys(obj).length;
 }
 
 var getDateTime = function () {
-  return new Date().toISOString().slice(0, 19);
+    return new Date().toISOString().slice(0, 19);
 };
 
 var writeDynamo = function (keyword, summary, timeStamp) {
-  var input = {
-    keywords: keyword,
-    summary: summary,
-    timeStamp: timeStamp,
-  };
-  var params = {
-    TableName: table,
-    Item: input,
-  };
-  docClient.put(params, function (err, data) {
-    if (err) {
-      console.log(
-        "Write to DynamoDB::error - Could be because new socket starts and summary=null \n" +
-        JSON.stringify(err, null, 2)
-      );
-    } else {
-      console.log("Wrote to DynamoDB: " + JSON.stringify(input));
-    }
-  });
+    var input = {
+        keywords: keyword,
+        summary: summary,
+        timeStamp: timeStamp,
+    };
+    var params = {
+        TableName: table,
+        Item: input,
+    };
+    docClient.put(params, function (err, data) {
+        if (err) {
+        console.log(
+            "Write to DynamoDB::error - Could be because new socket starts and summary=null \n" +
+            JSON.stringify(err, null, 2)
+        );
+        } else {
+        console.log("Wrote to DynamoDB: " + JSON.stringify(input));
+        }
+    });
 };
 
 const readDynamo = async (keyword) => {
-  const params = {
-    TableName: table,
-    Key: {
-      keywords: keyword,
-    },
-  };
+    const params = {
+        TableName: table,
+        Key: {
+        keywords: keyword,
+        },
+    };
 
-  return await docClient.get(params).promise();
+    return await docClient.get(params).promise();
 };
 
 // -----------

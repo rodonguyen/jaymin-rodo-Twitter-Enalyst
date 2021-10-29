@@ -28,4 +28,4 @@ const updateMyTrends = async () => {
 router.get('/', async (req, res, next) => {
 });
 
-module.exports = router;S
+module.exports = router;

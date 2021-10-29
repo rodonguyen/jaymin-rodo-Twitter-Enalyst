@@ -39,6 +39,8 @@ const io = socketio(server, {
   },
 });
 
+var cors = require('cors')
+
 process.setMaxListeners(Infinity);
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -49,6 +51,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(cors()) // Use this after the variable declaration
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);

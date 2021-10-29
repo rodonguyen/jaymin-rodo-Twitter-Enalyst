@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 // @material-ui/core components
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -35,26 +35,28 @@ import GoogleTrends from "../TrendingKeyword/GoogleTrending";
 import Notification from "../Notification/Notification";
 const useStyles = makeStyles(styles);
 
-const timer = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
 export default function SectionLogin() {
   const classes = useStyles();
   const [timerStream, getTimerStream] = useState();
   const [loaded, setLoaded] = useState(false);
-  const { keyword, setKeyword, streamTime, setStreamTime, tweetAlert } =
+  const { keyword, setKeyword, streamTime, setStreamTime, tweetAlert, tweetCounts } =
     useContext(TweetContext);
   const [input, setInput] = useState();
+  const [displayNoti, setDisplayNoti] = useState(false);
 
+  useEffect(() => {
+    if (tweetCounts > -1 && !displayNoti) {
+      console.log("NUMS OF ID TWEETS " + tweetCounts.length)
+      setDisplayNoti(true);
+    }
+  }, [tweetCounts])
   const handleChange = (event) => {
     getTimerStream(event.target.value);
   };
   const inputSearch = () => {
     if (!input) {
       alert("Missing keyword");
-      return;
-    }
-    if (!timerStream) {
-      alert("Missing timer for streaming");
       return;
     }
     const arr = input.trim().split(" ");
@@ -67,8 +69,8 @@ export default function SectionLogin() {
     setLoaded(true);
     console.log(keyword);
     console.log(streamTime);
-
   };
+
   return (
     <div className={classes.section}>
       <div className={classes.container}>
@@ -77,7 +79,7 @@ export default function SectionLogin() {
             {loaded ? (
               <div>
                 <div className={classes.noti}>
-                  <Notification status={"success"} />
+                  <Notification status={tweetCounts === 0 ? 'error' : 'success'} counts={tweetCounts} display={displayNoti} setDisplay={setDisplayNoti} />
                 </div>
                 <Box sx={{ flexGrow: 1 }} className={classes.appbar}>
                   <AppBar position="static" className={classes.appbar}>
@@ -136,32 +138,7 @@ export default function SectionLogin() {
                         onChange={(e) => setInput(e.target.value)}
                       />
                     </CardBody>
-                    <p className={classes.divider}>
-                      {" "}
-                      Select the number of tweets:
-                    </p>
-                    <FormControl fullWidth className={classes.selectTimer}>
-                      <InputLabel
-                        id="timer-stream"
-                        className={classes.inputLabel}
-                      >
-                        number
-                      </InputLabel>
-                      <Select
-                        labelId="timer-stream"
-                        id="timer-stream"
-                        defaultValue={""}
-                        value={timerStream}
-                        input={<OutlinedInput label="timer" />}
-                        onChange={handleChange}
-                      >
-                        {timer?.map((second) => (
-                          <MenuItem key={second} value={second}>
-                            {second}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+
                     <CardFooter className={classes.cardFooter}>
                       <Button
                         simple

@@ -35,6 +35,7 @@ export default function Tweets() {
     setGoogleTrends,
     setSummary100PostScore,
     setTweetAlert,
+    setTweetCounts
   } = useContext(TweetContext);
 
   const path = { keyword: keyword.input, timer: streamTime.timerStream };
@@ -44,7 +45,8 @@ export default function Tweets() {
       getSearchTwitter(keyword.input, streamTime.timerStream)
         .then((res) => {
           const data = res.data.data;
-          console.log(data);
+          console.log("response", data);
+          setTweetCounts(data.length)
           res.data.data.forEach(tweet => setIdTweet((idTweet) => [...idTweet, tweet.id_str]))
           res.data.data.forEach(tweet => setScoreSearchTweet((scoreTweet) => [...scoreTweet, tweet.num_score]))
         })
@@ -107,27 +109,31 @@ export default function Tweets() {
   return (
     <div className={classes.section}>
       <div className={classes.container}>
-        <GridContainer>
-          <GridItem xs={12} sm={12} md={8} className={classes.marginAuto}>
-            {idTweet.length ? (
-              idTweet.map((id, key) => {
-                if (key < 20) {
-                  return (
-                    <TweetEmbed
-                      id={id}
-                      placeholder={"loading"}
-                      className={classes.tweet}
-                    />
-                  );
-                }
-              })
-            ) : (
-              <div className="tweet-header">
-                <h1>search to display twitter post</h1>
-              </div>
-            )}
-          </GridItem>
-        </GridContainer>
+        <h1 className="title-h1">30 Recent Twitter Posts</h1>
+        <div className="hide-scroll">
+          <GridContainer>
+            <GridItem xs={12} sm={12} md={8} className={classes.marginAuto}>
+              {idTweet.length ? (
+                idTweet.map((id, key) => {
+                  if (key < 30) {
+                    return (
+                      <TweetEmbed
+                        id={id}
+                        placeholder={"loading"}
+                        className={classes.tweet}
+                      />
+                    );
+                  }
+                })
+              ) : (
+                <div className="tweet-header">
+                  <h1>search to display twitter post</h1>
+                </div>
+              )}
+            </GridItem>
+          </GridContainer>
+        </div>
+
       </div>
     </div>
   );

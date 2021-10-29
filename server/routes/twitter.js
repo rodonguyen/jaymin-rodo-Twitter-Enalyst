@@ -90,9 +90,8 @@ const readDynamo = async (keyword) => {
 };
 
 router.get('/', async (req, res) => {
-    console.log("request", req.query.keyword, req.query.count);
+    console.log("request", req.query.keyword);
     keyword = req.query.keyword;
-    count = req.query.count;
     readDynamo(keyword).then((data) => {
         // if (isFresh(data) !== 0) {
         //     console.log("Using 'summary' from DynamoDB for keyword", data.Item.keywords);
@@ -105,7 +104,7 @@ router.get('/', async (req, res) => {
         console.log("Using 'summary' from Twitter API");
         clientTwitter.get(
             "search/tweets",
-            { q: keyword, lang: "en", count: count },
+            { q: keyword, lang: "en", count: "100" },
             function (error, tweets) {
                 if (error) {
                     console.log("Error: " + error);
@@ -118,6 +117,7 @@ router.get('/', async (req, res) => {
                     tweets.statuses.forEach(function (tweet) {
                         result.push(getSentiment(tweet));
                     })
+                    ///Rodo, save result to database
                     res
                         .status(200)
                         .json({ error: false, data: result });

@@ -57,7 +57,7 @@ const options = {
     },
     title: {
       display: true,
-      text: "100 Most Recent Posts' Sentiment Score Summary",
+      text: "Most Recent Posts' Sentiment Score Summary",
     },
   },
 };

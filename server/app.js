@@ -93,9 +93,7 @@ var isEmpty = function (obj) {
   return !Object.keys(obj).length;
 }
 
-
 var getDateTime = function () {
-  // return new Date().toISOString().slice(0,17).replaceAll('-','').replaceAll(':','').replace('T','');
   return new Date().toISOString().slice(0, 19);
 };
 

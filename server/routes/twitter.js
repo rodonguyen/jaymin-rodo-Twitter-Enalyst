@@ -111,10 +111,34 @@ var writeRedis = (keyword, result, count) => {
 };
 
 
+function onScan(err, data) {
+    if (err) {
+        console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
+    } else {
+        // print all the movies
+        console.log("Scan succeeded.");
+        data.Items.forEach(function(item) {
+            console.log(item.keywords);
+        });
+
+        // continue scanning if we have more data, because
+        // scan can retrieve a maximum of 1MB of data
+        if (typeof data.LastEvaluatedKey != "undefined") {
+            console.log("Scanning for more...");
+            params.ExclusiveStartKey = data.LastEvaluatedKey;
+            docClient.scan(params, onScan);
+        }
+    }
+    
+}
+
 router.get('/', async (req, res) => {
     console.log("request", req.query.keyword, req.query.count);
     var keyword = req.query.keyword;
     var count = req.query.count;
+
+    
+
 
     console.log( "Persistence ---------> Check data in Redis");
     redisClient.get(`TwitterEnalyst:${keyword}`, (err, result) => {
@@ -122,6 +146,9 @@ router.get('/', async (req, res) => {
             // const dataJSON = JSON.parse(result);
             console.log("Persistence ---------> Found in Redis");
             console.log(result);
+
+
+
 
             // Declare tweets.
             // tweets.statuses.forEach(function (tweet) {

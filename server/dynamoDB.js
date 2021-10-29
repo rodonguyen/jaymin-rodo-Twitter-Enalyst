@@ -10,6 +10,30 @@ AWS.config.update(awsConfig);
 var docClient = new AWS.DynamoDB.DocumentClient();
 var table = "TwitterEnalyst";
 
+docClient.scan({TableName: table}, onScan);
+function onScan(err, data) {
+    if (err) {
+        console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
+    } else {
+        // print all the movies
+        console.log("Scan succeeded.");
+        var keywords = [];
+        data.Items.forEach(function(item) {
+            console.log(item.keywords);
+            keywords.push(item.keywords);
+        });
+        console.log(keywords);
+
+
+        // continue scanning if we have more data, because
+        // scan can retrieve a maximum of 1MB of data
+        if (typeof data.LastEvaluatedKey != "undefined") {
+            console.log("Scanning for more...");
+            params.ExclusiveStartKey = data.LastEvaluatedKey;
+            docClient.scan(params, onScan);
+        }
+    }
+}
 
 var readDynamo = function (keyword) {
     var params = {
@@ -95,7 +119,7 @@ var remove = function () {
 }
 
 // remove();
-const summary_mockup = {'hi': 4, 'low':-1};
-write('btc', JSON.stringify(summary_mockup), getDateTime());
+// const summary_mockup = {'hi': 4, 'low':-1};
+// write('btc', JSON.stringify(summary_mockup), getDateTime());
 // update();
 // read();

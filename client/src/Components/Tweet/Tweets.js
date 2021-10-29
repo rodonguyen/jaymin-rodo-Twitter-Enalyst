@@ -13,6 +13,7 @@ import GridContainer from "./TweetGrid/TweetGridContainer";
 import GridItem from "./TweetGrid/TweetGridItem";
 import { getSearchTwitter } from '../../Services/GetSearchTwitter'
 import { getTrendingKeyword } from '../../Services/GetTrendingKeyword'
+import { getUserTrendingKeyword } from '../../Services/GetUserTrend'
 
 const ENDPOINT = "http://localhost:3000/";
 const socket = io(ENDPOINT, {});
@@ -34,6 +35,7 @@ export default function Tweets() {
     achirveScore,
     setGoogleTrends,
     setSummary100PostScore,
+    setUserTrend,
     setTweetAlert,
     setTweetCounts
   } = useContext(TweetContext);
@@ -56,6 +58,10 @@ export default function Tweets() {
   useEffect(() => {
     getTrendingKeyword().then(res => {
       setGoogleTrends(res)
+      console.log(res);
+    })
+    getUserTrendingKeyword().then(res => {
+      setUserTrend(res);
       console.log(res);
     })
   }, [])

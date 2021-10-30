@@ -33,22 +33,22 @@ const clientTwitter = new Twitter({
 });
 // --- Rodo ---
 
-// Check whether if data is valid or not (less than 24h old, not empty and count is the same as requested)
+
 var checkData = function (data, count) {
-    // data = JSON.parse(data);
-    console.log("checkData::Your data returned ", data);
+    // Data is valid?
+    // console.log("checkData::Your data returned ", data);
     if (typeof (data) === 'undefined' || isEmpty(data)) {
         console.log('data undefined or empty');
         return 0;
     }
-
+    // Data is less than 24 hours old?
     else if (data) {
         console.log(typeof (data.timeStamp));
         console.log((data.timeStamp));
         var timestamp = new Date(data.timeStamp);
         console.log("checkData::timestamp ", timestamp);
         now = Date.now();
-        console.log("checkData::check fresh data ", Math.abs(now - timestamp) / 3600 / 1000 < 24);
+        // console.log("checkData::check fresh data ", Math.abs(now - timestamp) / 3600 / 1000 < 24);
         return Math.abs(now - timestamp) / 3600 / 1000 < 24 ? 1 : 0;
     } else {
         return 0;
@@ -59,11 +59,11 @@ var isEmpty = function (obj) {
     return !Object.keys(obj).length;
 }
 
-
 var getDateTime = function () {
     return new Date().toISOString().slice(0, 19);
 };
 
+// Write queried result to Dynamo
 var writeDynamo = function (keyword, result, count) {
     var input = {
         keywords: keyword,
@@ -82,11 +82,13 @@ var writeDynamo = function (keyword, result, count) {
                 JSON.stringify(err)
             );
         } else {
-            console.log("Persistence ---------> writeDynamo: " + JSON.stringify(input));
+            console.log("Persistence ---------> writeDynamo:");
+            // console.log(JSON.stringify(input));
         }
     });
 };
 
+// Read data on Dynamo
 const readDynamo = async (keyword) => {
     const params = {
         TableName: table,
@@ -97,8 +99,9 @@ const readDynamo = async (keyword) => {
     return await docClient.get(params).promise();
 };
 
+// Write queried result to Redis
 var writeRedis = (keyword, result, count) => {
-    console.log("Persistence ---------> WriteRedis: ", JSON.stringify(keyword, result, count));
+    console.log("Persistence ---------> writeRedis: " + JSON.stringify(keyword));
     redisClient.setex(
         `TwitterEnalyst:${keyword}`,
         3600,
@@ -112,34 +115,10 @@ var writeRedis = (keyword, result, count) => {
 };
 
 
-function onScan(err, data) {
-    if (err) {
-        console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
-    } else {
-        // print all the movies
-        console.log("Scan succeeded.");
-        data.Items.forEach(function (item) {
-            console.log(item.keywords);
-        });
-
-        // continue scanning if we have more data, because
-        // scan can retrieve a maximum of 1MB of data
-        if (typeof data.LastEvaluatedKey != "undefined") {
-            console.log("Scanning for more...");
-            params.ExclusiveStartKey = data.LastEvaluatedKey;
-            docClient.scan(params, onScan);
-        }
-    }
-
-}
-
 router.get('/', async (req, res) => {
     console.log("request", req.query.keyword, req.query.count);
     var keyword = req.query.keyword;
     var count = req.query.count;
-
-
-
 
     console.log("Persistence ---------> Check data in Redis");
     redisClient.get(`TwitterEnalyst:${keyword}`, (err, result) => {
@@ -158,7 +137,7 @@ router.get('/', async (req, res) => {
                 if (checkData(data.Item, count) !== 0) {
                     console.log("Persistence ---------> Found in DynamoDB");
                     result = data.Item.result;
-                    console.log(result);
+                    // console.log(result);
                     res
                         .status(200)
                         .json({ error: false, data: result });
@@ -189,7 +168,6 @@ router.get('/', async (req, res) => {
                                     .json({ error: false, data: result });
                                 console.log("'result' is collected");
                                 // console.log("result", result);
-
                                 console.log("Persitence ----------> Writing result to Dynamo");
                                 writeDynamo(keyword, result, count)
                                 console.log("Persitence ----------> Writing result to Redis");
@@ -200,8 +178,6 @@ router.get('/', async (req, res) => {
             });
         }
     });
-
 })
-
 
 module.exports = router; 

@@ -12,45 +12,45 @@ import styles from "./notificationStyles.js";
 const useStyles = makeStyles(styles);
 
 export default function SectionNotifications({ status, counts, display, setDisplay }) {
-  const notiStatus = (status, counts) => {
-    switch (status) {
-      case "success":
-        return (
-          <SnackbarContent
-            message={
-              <span>
-                <b>SUCCESS ALERT:</b> Search successful, {counts} available tweets
-              </span>
-            }
-            close
-            color="success"
-            icon={Check}
-            setDisplay={setDisplay}
-          />
-        );
-      case "error":
-        return (
-          <SnackbarContent
-            message={
-              <span>
-                <b>ERROR ALERT:</b> Can not get tweets, please check your keyword and try again
-              </span>
-            }
-            close
-            color="danger"
-            icon={Warning}
-            setDisplay={setDisplay}
-          />
-        )
-      default:
+    const notiStatus = (status, counts) => {
+        switch (status) {
+        case "success":
+            return (
+            <SnackbarContent
+                message={
+                <span>
+                    <b>SUCCESS:</b> Finished searching, {counts} tweets found.
+                </span>
+                }
+                close
+                color="success"
+                icon={Check}
+                setDisplay={setDisplay}
+            />
+            );
+        case "error":
+            return (
+            <SnackbarContent
+                message={
+                <span>
+                    <b>ERROR ALERT:</b> Can not get tweets, please check your keyword and try again
+                </span>
+                }
+                close
+                color="danger"
+                icon={Warning}
+                setDisplay={setDisplay}
+            />
+            )
+        default:
+        }
     }
-  }
-  const classes = useStyles();
-  return (
-    <div className={classes.section} id="notifications">
-      {display ? <div className={classes.container}>{notiStatus(status, counts)} </div>
+    const classes = useStyles();
+    return (
+        <div className={classes.section} id="notifications">
+        {display ? <div className={classes.container}>{notiStatus(status, counts)} </div>
 
-        : null}
-    </div>
-  );
+            : null}
+        </div>
+    );
 }

@@ -11,32 +11,31 @@ import Tweets from "./Components/Tweet/Tweets";
 const useStyles = makeStyles(styles);
 
 function App(props) {
-  const classes = useStyles();
-  const { ...rest } = props;
-  return (
-    <div className="main">
-      <TweetProvider>
-        <CssBaseline />
-        <Header
-          brand="Twitter Sentiment"
-          // rightLinks={}
-          fixed
-          color="transparent"
-          changeColorOnScroll={{
-            height: 400,
-            color: "white",
-          }}
-          {...rest}
-        />
-        <Parallax image="https://monkeylearn.com/static/6700dcab9bcc691104dd0d794f6e7ef4/Sentiment-analysis-of-Twitter-Social.png"></Parallax>
-        <div className={classNames(classes.main, classes.mainRaised)}>
-          <SearchSection />
-
-          <Tweets />
+    const classes = useStyles();
+    const { ...rest } = props;
+    return (
+        <div className="main">
+        <TweetProvider>
+            <CssBaseline />
+            <Header
+            brand="Twitter Enalyst"
+            // rightLinks={}
+            fixed
+            color="transparent"
+            changeColorOnScroll={{
+                height: 400,
+                color: "white",
+            }}
+            {...rest}
+            />
+            <Parallax image="https://monkeylearn.com/static/6700dcab9bcc691104dd0d794f6e7ef4/Sentiment-analysis-of-Twitter-Social.png"></Parallax>
+            <div className={classNames(classes.main, classes.mainRaised)}>
+            <SearchSection />
+            <Tweets />
+            </div>
+        </TweetProvider>
         </div>
-      </TweetProvider>
-    </div>
-  );
+    );
 }
 
 export default App;

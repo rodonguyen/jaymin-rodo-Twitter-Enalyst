@@ -8,8 +8,8 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ReplayIcon from "@mui/icons-material/Replay";
 import {
-  InputAdornment,
-  makeStyles,
+    InputAdornment,
+    makeStyles,
 } from "@material-ui/core/";
 // nodejs library that concatenates classes
 
@@ -32,127 +32,127 @@ const useStyles = makeStyles(styles);
 
 
 export default function SectionLogin() {
-  const classes = useStyles();
-  const [loaded, setLoaded] = useState(false);
-  const { keyword, setKeyword, streamTime, tweetCounts } =
-    useContext(TweetContext);
-  const [input, setInput] = useState();
-  const [displayNoti, setDisplayNoti] = useState(false);
+    const classes = useStyles();
+    const [loaded, setLoaded] = useState(false);
+    const { keyword, setKeyword, streamTime, tweetCounts } =
+        useContext(TweetContext);
+    const [input, setInput] = useState();
+    const [displayNoti, setDisplayNoti] = useState(false);
 
-  useEffect(() => {
-    if (tweetCounts > -1 && !displayNoti) {
-      setDisplayNoti(true);
-    }
-  }, [tweetCounts, displayNoti])
+    useEffect(() => {
+        if (tweetCounts > -1 && !displayNoti) {
+        setDisplayNoti(true);
+        }
+    }, [tweetCounts, displayNoti])
 
-  const inputSearch = () => {
-    if (!input) {
-      alert("Missing keyword");
-      return;
-    }
-    const arr = input.trim().split(" ");
-    if (arr.length !== 1) {
-      alert("ony can search for one word")
-      return;
-    }
-    setKeyword({ input });
-    setLoaded(true);
-    console.log(keyword);
-    console.log(streamTime);
-  };
+    const inputSearch = () => {
+        if (!input) {
+        alert("Missing keyword");
+        return;
+        }
+        const arr = input.trim().split(" ");
+        if (arr.length !== 1) {
+        alert("ony can search for one word")
+        return;
+        }
+        setKeyword({ input });
+        setLoaded(true);
+        console.log(keyword);
+        console.log(streamTime);
+    };
 
-  return (
-    <div className={classes.section}>
-      <div className={classes.container}>
-        <GridContainer justifyContent="center">
-          <GridItem xs={12} sm={12} md={4}>
-            {loaded ? (
-              <div className={classes.wrapper}>
-                <div className={classes.noti}>
-                  <Notification status={tweetCounts === 0 ? 'error' : 'success'} counts={tweetCounts} display={displayNoti} setDisplay={setDisplayNoti} />
+    return (
+        <div className={classes.section}>
+        <div className={classes.container}>
+            <GridContainer justifyContent="center">
+            <GridItem xs={12} sm={12} md={4}>
+                {loaded ? (
+                <div className={classes.wrapper}>
+                    <div className={classes.noti}>
+                    <Notification status={tweetCounts === 0 ? 'error' : 'success'} counts={tweetCounts} display={displayNoti} setDisplay={setDisplayNoti} />
+                    </div>
+                    <Box sx={{ flexGrow: 1 }} className={classes.appbar}>
+                    <AppBar position="static" className={classes.appbar}>
+                        <Toolbar>
+                        <IconButton
+                            size="large"
+                            edge="start"
+                            color="inherit"
+                            aria-label="menu"
+                            sx={{ mr: 2 }}
+                        >
+                            <MenuIcon />
+                        </IconButton>
+                        <Typography
+                            variant="h6"
+                            component="div"
+                            sx={{ flexGrow: 1 }}
+                        >
+                            Back to Search
+                        </Typography>
+                        <Button
+                            color="primary"
+                            onClick={() => window.location.reload()}
+                        >
+                            <ReplayIcon />
+                        </Button>
+                        </Toolbar>
+                    </AppBar>
+                    </Box>
+                    <div className={classes.chart}>
+                    <Card>
+                        <TotalSearchChart />
+                    </Card>
+                    </div>
                 </div>
-                <Box sx={{ flexGrow: 1 }} className={classes.appbar}>
-                  <AppBar position="static" className={classes.appbar}>
-                    <Toolbar>
-                      <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{ mr: 2 }}
-                      >
-                        <MenuIcon />
-                      </IconButton>
-                      <Typography
-                        variant="h6"
-                        component="div"
-                        sx={{ flexGrow: 1 }}
-                      >
-                        Go back to search bar
-                      </Typography>
-                      <Button
-                        color="primary"
-                        onClick={() => window.location.reload()}
-                      >
-                        <ReplayIcon />
-                      </Button>
-                    </Toolbar>
-                  </AppBar>
-                </Box>
-                <div className={classes.chart}>
-                  <Card>
-                    <TotalSearchChart />
-                  </Card>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <Card>
-                  <form className={classes.form}>
-                    <CardHeader color="primary" className={classes.cardHeader}>
-                      <h2>Welcome to the Application</h2>
-                    </CardHeader>
-                    <CardBody>
-                      <CustomInput
-                        labelText="search one keyword..."
-                        id="first"
-                        formControlProps={{
-                          fullWidth: true,
-                        }}
-                        inputProps={{
-                          type: "text",
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <Search className={classes.inputIconsColor} />
-                            </InputAdornment>
-                          ),
-                        }}
-                        onChange={(e) => setInput(e.target.value)}
-                      />
-                    </CardBody>
+                ) : (
+                <div>
+                    <Card>
+                    <form className={classes.form}>
+                        <CardHeader color="primary" className={classes.cardHeader}>
+                        <h2>Welcome to Twitter Enalyst</h2>
+                        </CardHeader>
+                        <CardBody>
+                        <CustomInput
+                            labelText="Type a word to analyze..."
+                            id="first"
+                            formControlProps={{
+                            fullWidth: true,
+                            }}
+                            inputProps={{
+                            type: "text",
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                <Search className={classes.inputIconsColor} />
+                                </InputAdornment>
+                            ),
+                            }}
+                            onChange={(e) => setInput(e.target.value)}
+                        />
+                        </CardBody>
 
-                    <CardFooter className={classes.cardFooter}>
-                      <Button
-                        simple
-                        color="primary"
-                        size="lg"
-                        onClick={inputSearch}
-                      >
-                        Search
-                      </Button>
-                    </CardFooter>
-                  </form>
-                </Card>
-                <h1>
-                  <Card className={classes.trends}>
-                    <GoogleTrends />
-                  </Card>
-                </h1>
-              </div>
-            )}
-          </GridItem>
-        </GridContainer>
-      </div>
-    </div>
-  );
+                        <CardFooter className={classes.cardFooter}>
+                        <Button
+                            simple
+                            color="primary"
+                            size="lg"
+                            onClick={inputSearch}
+                        >
+                            Search
+                        </Button>
+                        </CardFooter>
+                    </form>
+                    </Card>
+                    <h1>
+                    <Card className={classes.trends}>
+                        <GoogleTrends />
+                    </Card>
+                    </h1>
+                </div>
+                )}
+            </GridItem>
+            </GridContainer>
+        </div>
+        </div>
+    );
 }

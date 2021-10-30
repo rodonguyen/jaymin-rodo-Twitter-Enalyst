@@ -24,6 +24,7 @@ const getTrends = async () => {
 //         });
 //     }
 // });
+
 const getUniqueItemsByProperties = (items, propNames) => {
     const propNamesArray = Array.from(propNames);
 

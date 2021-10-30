@@ -18,20 +18,17 @@ AWS.config.update(awsConfig);
 var docClient = new AWS.DynamoDB.DocumentClient();
 var table = "TwitterEnalyst";
 
-
-
-
 // Enter http://localhost:3000/myTrend
+// This route is used to scan Dynamo and get the trending keywords on our website 
 router.get('/', async (req, res, next) => {
     const result = await docClient.scan({ TableName: table }, (err, data) => {
         if (err) {
             console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
         } else {
             // print all the movies
-            console.log("Scan succeeded.");
+            console.log("/myTrend - Scan succeeded.");
             var keywords = [];
             data.Items.forEach(function (item) {
-                // console.log(item.keywords);
                 keywords.push(item.keywords);
             });
             console.log(keywords);

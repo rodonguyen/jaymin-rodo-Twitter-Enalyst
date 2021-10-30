@@ -9,9 +9,9 @@ const { env } = require("process");
 var dotenv = require("dotenv");
 var redis = require("redis");
 const redisClient = redis.createClient(
-    //     {
-    //     url: 'redis://redis:6379',
-    // }
+    {
+        url: '//jamesdylanassignment2.km2jzi.ng.0001.apse2.cache.amazonaws.com:6379',
+    }
 );
 dotenv.config();
 

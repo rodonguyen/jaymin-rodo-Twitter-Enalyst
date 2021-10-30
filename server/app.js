@@ -12,10 +12,10 @@ var dotenv = require("dotenv");
 dotenv.config();
 
 var awsConfig = {
-  region: "ap-southeast-2",
-  endpoint: process.env.AWS_ENDPOINT,
-  accessKeyId: process.env.AWS_KEYID,
-  secretAccessKey: process.env.AWS_SECRETKEY,
+    region: "ap-southeast-2",
+    endpoint: process.env.AWS_ENDPOINT,
+    accessKeyId: process.env.AWS_KEYID,
+    secretAccessKey: process.env.AWS_SECRETKEY,
 };
 AWS.config.update(awsConfig);
 var docClient = new AWS.DynamoDB.DocumentClient();
@@ -34,11 +34,13 @@ const server = require("http").createServer(app);
 // Create the Socket IO server on
 // the top of http server
 const io = socketio(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+    },
 });
+
+var cors = require('cors')
 
 process.setMaxListeners(Infinity);
 // view engine setup
@@ -50,6 +52,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(cors()) // Use this after the variable declaration
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
@@ -111,12 +114,12 @@ var writeDynamo = function (keyword, summary, timeStamp) {
     };
     docClient.put(params, function (err, data) {
         if (err) {
-        console.log(
-            "Write to DynamoDB::error - Could be because new socket starts and summary=null \n" +
-            JSON.stringify(err, null, 2)
-        );
+            console.log(
+                "Write to DynamoDB::error - Could be because new socket starts and summary=null \n" +
+                JSON.stringify(err, null, 2)
+            );
         } else {
-        console.log("Wrote to DynamoDB: " + JSON.stringify(input));
+            console.log("Wrote to DynamoDB: " + JSON.stringify(input));
         }
     });
 };
@@ -125,7 +128,7 @@ const readDynamo = async (keyword) => {
     const params = {
         TableName: table,
         Key: {
-        keywords: keyword,
+            keywords: keyword,
         },
     };
 

@@ -30,19 +30,16 @@ const clientTwitter = new Twitter({
 // --- Rodo ---
 
 // Check whether if data is valid or not (less than 24h old, not empty and count is the same as requested)
-var checkData = function (data,count) {
+var checkData = function (data, count) {
     // data = JSON.parse(data);
     console.log("checkData::Your data returned ", data);
     if (typeof (data) === 'undefined' || isEmpty(data)) {
         console.log('data undefined or empty');
         return 0;
     }
-    // else if (data.count !== count) {
-    //     console.log('data.count is different');
-    //     return 0;
-    // }
+
     else if (data) {
-        console.log(typeof(data.timeStamp));
+        console.log(typeof (data.timeStamp));
         console.log((data.timeStamp));
         var timestamp = new Date(data.timeStamp);
         console.log("checkData::timestamp ", timestamp);
@@ -117,7 +114,7 @@ function onScan(err, data) {
     } else {
         // print all the movies
         console.log("Scan succeeded.");
-        data.Items.forEach(function(item) {
+        data.Items.forEach(function (item) {
             console.log(item.keywords);
         });
 
@@ -129,7 +126,7 @@ function onScan(err, data) {
             docClient.scan(params, onScan);
         }
     }
-    
+
 }
 
 router.get('/', async (req, res) => {
@@ -137,80 +134,69 @@ router.get('/', async (req, res) => {
     var keyword = req.query.keyword;
     var count = req.query.count;
 
-    
 
 
-    console.log( "Persistence ---------> Check data in Redis");
+
+    console.log("Persistence ---------> Check data in Redis");
     redisClient.get(`TwitterEnalyst:${keyword}`, (err, result) => {
-        if (result && checkData(JSON.parse(result),count)) {
-            // const dataJSON = JSON.parse(result);
+        if (result && checkData(JSON.parse(result), count)) {
+            const dataJSON = JSON.parse(result);
             console.log("Persistence ---------> Found in Redis");
-            console.log(result);
 
-
-
-
-            // Declare tweets.
-            // tweets.statuses.forEach(function (tweet) {
-            //     result.push(getSentiment(tweet));
-            // })
-            // res
-            //     .status(200)
-            //     .json({ error: false, data: result });
+            res
+                .status(200)
+                .json({ error: false, data: dataJSON.result });
         }
         else {
-            console.log( "Persistence ---------> Not found in Redis");
-            console.log( "Persistence ---------> Check data in DynamoDB");
+            console.log("Persistence ---------> Not found in Redis");
+            console.log("Persistence ---------> Check data in DynamoDB");
             readDynamo(keyword).then((data) => {
                 if (checkData(data.Item, count) !== 0) {
                     console.log("Persistence ---------> Found in DynamoDB");
                     result = data.Item.result;
-                    // Declare tweets.
-                    // tweets.statuses.forEach(function (tweet) {
-                    //     result.push(getSentiment(tweet));
-                    // })
-                    // res
-                    //     .status(200)
-                    //     .json({ error: false, data: result });
+                    console.log(result);
+                    res
+                        .status(200)
+                        .json({ error: false, data: result });
 
                     console.log("Persistence ---------> Add this data to Redis");
                     writeRedis(keyword, result, count);
 
                 } else {
-                    console.log( "Persistence ---------> Not found in Dynamo");
+                    console.log("Persistence ---------> Not found in Dynamo");
                     console.log("Persitence ----------> Using Twitter API");
                     clientTwitter.get(
-                    "search/tweets",
-                    { q: keyword, lang: "en", count: count },
-                    function (error, tweets) {
-                        if (error) {
-                            console.log("Error: " + error);
-                            res.
-                                status(404)
-                                .json({ error: true, message: "Error: " + error });
-                        } else {
-                            var result = [];
-                            // console.log("searchTweet", tweets);
-                            tweets.statuses.forEach(function (tweet) {
-                                result.push(getSentiment(tweet));
-                            })
-                            res
-                                .status(200)
-                                .json({ error: false, data: result });
-                            console.log("'result' is collected");
-                            // console.log("result", result);
+                        "search/tweets",
+                        { q: keyword, lang: "en", count: count },
+                        function (error, tweets) {
+                            if (error) {
+                                console.log("Error: " + error);
+                                res.
+                                    status(404)
+                                    .json({ error: true, message: "Error: " + error });
+                            } else {
+                                var result = [];
+                                // console.log("searchTweet", tweets);
+                                tweets.statuses.forEach(function (tweet) {
+                                    result.push(getSentiment(tweet));
+                                })
+                                res
+                                    .status(200)
+                                    .json({ error: false, data: result });
+                                console.log("'result' is collected");
+                                // console.log("result", result);
 
-                            console.log("Persitence ----------> Writing result to Dynamo");
-                            writeDynamo(keyword, result, count)
-                            console.log("Persitence ----------> Writing result to Redis");
-                            writeRedis(keyword, result, count);
-                        }
-                    })
+                                console.log("Persitence ----------> Writing result to Dynamo");
+                                writeDynamo(keyword, result, count)
+                                console.log("Persitence ----------> Writing result to Redis");
+                                writeRedis(keyword, result, count);
+                            }
+                        })
                 }
             });
         }
     });
-    
+
 })
 
 

@@ -15,10 +15,11 @@ import styles from "./snackbarStyle.js";
 const useStyles = makeStyles(styles);
 
 export default function SnackbarContent(props) {
-  const { message, color, close, icon } = props;
+  const { message, color, close, icon, setDisplay } = props;
   const classes = useStyles();
   var action = [];
   const closeAlert = () => {
+    setDisplay(false)
     setAlert(null);
   };
   if (close !== undefined) {

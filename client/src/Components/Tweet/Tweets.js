@@ -13,6 +13,7 @@ import GridContainer from "./TweetGrid/TweetGridContainer";
 import GridItem from "./TweetGrid/TweetGridItem";
 import { getSearchTwitter } from '../../Services/GetSearchTwitter'
 import { getTrendingKeyword } from '../../Services/GetTrendingKeyword'
+import { getUserTrendingKeyword } from '../../Services/GetUserTrend'
 
 const ENDPOINT = "http://localhost:3000/";
 const socket = io(ENDPOINT, {});
@@ -34,7 +35,9 @@ export default function Tweets() {
     achirveScore,
     setGoogleTrends,
     setSummary100PostScore,
+    setUserTrend,
     setTweetAlert,
+    setTweetCounts
   } = useContext(TweetContext);
 
   const path = { keyword: keyword.input, timer: streamTime.timerStream };
@@ -44,7 +47,8 @@ export default function Tweets() {
       getSearchTwitter(keyword.input, streamTime.timerStream)
         .then((res) => {
           const data = res.data.data;
-          console.log(data);
+          console.log("response", data);
+          setTweetCounts(data.length)
           res.data.data.forEach(tweet => setIdTweet((idTweet) => [...idTweet, tweet.id_str]))
           res.data.data.forEach(tweet => setScoreSearchTweet((scoreTweet) => [...scoreTweet, tweet.num_score]))
         })
@@ -54,6 +58,10 @@ export default function Tweets() {
   useEffect(() => {
     getTrendingKeyword().then(res => {
       setGoogleTrends(res)
+      console.log(res);
+    })
+    getUserTrendingKeyword().then(res => {
+      setUserTrend(res);
       console.log(res);
     })
   }, [])
@@ -107,27 +115,31 @@ export default function Tweets() {
   return (
     <div className={classes.section}>
       <div className={classes.container}>
-        <GridContainer>
-          <GridItem xs={12} sm={12} md={8} className={classes.marginAuto}>
-            {idTweet.length ? (
-              idTweet.map((id, key) => {
-                if (key < 20) {
-                  return (
-                    <TweetEmbed
-                      id={id}
-                      placeholder={"loading"}
-                      className={classes.tweet}
-                    />
-                  );
-                }
-              })
-            ) : (
-              <div className="tweet-header">
-                <h1>search to display twitter post</h1>
-              </div>
-            )}
-          </GridItem>
-        </GridContainer>
+        <h1 className="title-h1">30 Recent Twitter Posts</h1>
+        <div className="hide-scroll">
+          <GridContainer>
+            <GridItem xs={12} sm={12} md={8} className={classes.marginAuto}>
+              {idTweet.length ? (
+                idTweet.map((id, key) => {
+                  if (key < 30) {
+                    return (
+                      <TweetEmbed
+                        id={id}
+                        placeholder={"loading"}
+                        className={classes.tweet}
+                      />
+                    );
+                  }
+                })
+              ) : (
+                <div className="tweet-header">
+                  <h1>search to display twitter post</h1>
+                </div>
+              )}
+            </GridItem>
+          </GridContainer>
+        </div>
+
       </div>
     </div>
   );

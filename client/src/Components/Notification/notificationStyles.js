@@ -14,7 +14,7 @@ const notificationsStyles = {
     minHeight: "32px",
     textDecoration: "none",
   },
-  container,
+
 };
 
 export default notificationsStyles;

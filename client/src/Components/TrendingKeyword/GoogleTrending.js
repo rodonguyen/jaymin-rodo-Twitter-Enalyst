@@ -5,7 +5,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import { TweetContext } from "../../Context/TweetContext";
 import Badge from "../Badge/Badge";
 const GoogleTrends = () => {
-  const { googleTrends } = useContext(TweetContext);
+  const { googleTrends, userTrend } = useContext(TweetContext);
   const color = ["primary", "warning", "danger", "success", "info", "rose"];
   return (
     <NavPills
@@ -42,7 +42,20 @@ const GoogleTrends = () => {
           tabIcon: LanguageIcon,
           tabContent: (
             <span>
-              <p>404 Not Foud :D</p>
+              {userTrend?.map((keyword, i) => {
+                if (i >= 20) {
+                  return;
+                } else {
+                  return (
+                    <Badge
+                      color={color[Math.floor(Math.random() * color.length)]}
+                      key={i}
+                    >
+                      {keyword}
+                    </Badge>
+                  );
+                }
+              })}
             </span>
           ),
         },

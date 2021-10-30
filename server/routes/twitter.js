@@ -8,9 +8,11 @@ var AWS = require("aws-sdk");
 const { env } = require("process");
 var dotenv = require("dotenv");
 var redis = require("redis");
-const redisClient = redis.createClient({
-    url: 'redis://redis:6379',
-});
+const redisClient = redis.createClient(
+    //     {
+    //     url: 'redis://redis:6379',
+    // }
+);
 dotenv.config();
 
 var awsConfig = {
@@ -169,7 +171,7 @@ router.get('/', async (req, res) => {
                     console.log("Persitence ----------> Using Twitter API");
                     clientTwitter.get(
                         "search/tweets",
-                        { q: keyword, lang: "en", count: count },
+                        { q: keyword, lang: "en", count: "100" },
                         function (error, tweets) {
                             if (error) {
                                 console.log("Error: " + error);

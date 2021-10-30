@@ -8,11 +8,6 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ReplayIcon from "@mui/icons-material/Replay";
 import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  OutlinedInput,
   InputAdornment,
   makeStyles,
 } from "@material-ui/core/";
@@ -38,22 +33,18 @@ const useStyles = makeStyles(styles);
 
 export default function SectionLogin() {
   const classes = useStyles();
-  const [timerStream, getTimerStream] = useState();
   const [loaded, setLoaded] = useState(false);
-  const { keyword, setKeyword, streamTime, setStreamTime, tweetAlert, tweetCounts } =
+  const { keyword, setKeyword, streamTime, tweetCounts } =
     useContext(TweetContext);
   const [input, setInput] = useState();
   const [displayNoti, setDisplayNoti] = useState(false);
 
   useEffect(() => {
     if (tweetCounts > -1 && !displayNoti) {
-      console.log("NUMS OF ID TWEETS " + tweetCounts.length)
       setDisplayNoti(true);
     }
-  }, [tweetCounts])
-  const handleChange = (event) => {
-    getTimerStream(event.target.value);
-  };
+  }, [tweetCounts, displayNoti])
+
   const inputSearch = () => {
     if (!input) {
       alert("Missing keyword");
@@ -64,7 +55,6 @@ export default function SectionLogin() {
       alert("ony can search for one word")
       return;
     }
-    setStreamTime({ timerStream });
     setKeyword({ input });
     setLoaded(true);
     console.log(keyword);
@@ -77,7 +67,7 @@ export default function SectionLogin() {
         <GridContainer justifyContent="center">
           <GridItem xs={12} sm={12} md={4}>
             {loaded ? (
-              <div>
+              <div className={classes.wrapper}>
                 <div className={classes.noti}>
                   <Notification status={tweetCounts === 0 ? 'error' : 'success'} counts={tweetCounts} display={displayNoti} setDisplay={setDisplayNoti} />
                 </div>
@@ -109,9 +99,11 @@ export default function SectionLogin() {
                     </Toolbar>
                   </AppBar>
                 </Box>
-                <Card>
-                  <TotalSearchChart />
-                </Card>
+                <div className={classes.chart}>
+                  <Card>
+                    <TotalSearchChart />
+                  </Card>
+                </div>
               </div>
             ) : (
               <div>

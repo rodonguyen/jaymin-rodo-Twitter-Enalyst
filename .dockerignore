@@ -1,0 +1,7 @@
+node_modules
+.dockerignore
+Dockerfile
+Dockerfile.prod
+server/node_modules
+client/node_modules
+Specifications-and-Documents

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 // @material-ui/icons
@@ -6,7 +6,6 @@ import Check from "@material-ui/icons/Check";
 import Warning from "@material-ui/icons/Warning";
 // core components
 import SnackbarContent from "../Snackbar/SnackbarContent.js";
-import { TweetContext } from "../../Context/TweetContext";
 
 import styles from "./notificationStyles.js";
 
@@ -43,7 +42,7 @@ export default function SectionNotifications({ status, counts, display, setDispl
             setDisplay={setDisplay}
           />
         )
-
+      default:
     }
   }
   const classes = useStyles();

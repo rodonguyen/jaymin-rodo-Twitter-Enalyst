@@ -21,9 +21,7 @@ const GoogleTrends = () => {
           tabContent: (
             <span>
               {googleTrends?.map((keyword, i) => {
-                if (i >= 20) {
-                  return;
-                } else {
+                if (i < 20) {
                   return (
                     <Badge
                       color={color[Math.floor(Math.random() * color.length)]}
@@ -33,6 +31,7 @@ const GoogleTrends = () => {
                     </Badge>
                   );
                 }
+                return null;
               })}
             </span>
           ),
@@ -44,8 +43,6 @@ const GoogleTrends = () => {
             <span>
               {userTrend?.map((keyword, i) => {
                 if (i >= 20) {
-                  return;
-                } else {
                   return (
                     <Badge
                       color={color[Math.floor(Math.random() * color.length)]}
@@ -55,6 +52,7 @@ const GoogleTrends = () => {
                     </Badge>
                   );
                 }
+                return null;
               })}
             </span>
           ),

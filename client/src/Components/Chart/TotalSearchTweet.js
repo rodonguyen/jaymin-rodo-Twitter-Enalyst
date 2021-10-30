@@ -70,19 +70,15 @@ const TotalSearchChart = () => {
   const [positiveScore, setPositiveScore] = useState(0);
   const [countNeural, setCountNeural] = useState(0);
 
-  console.log("11", scoreSearchTweet, negativeScore, positiveScore);
   useEffect(() => {
     if (scoreSearchTweet.length > 0) {
-      console.log("test", sumNeg(scoreSearchTweet))
       const [countNegative, sumNegative] = sumNeg(scoreSearchTweet);
       setNegativeScore(-sumNegative);
       setNegativePost(countNegative);
-      console.log("test", sumPos(scoreSearchTweet))
       const [countPositive, sumPositive] = sumPos(scoreSearchTweet);
       setPositiveScore(sumPositive);
       setPositivePost(countPositive);
       const [neural] = sumNeural(scoreSearchTweet);
-      console.log("neural", [neural])
       setCountNeural(neural)
     }
     else if (summary100PostScore.positiveScore) {
@@ -93,14 +89,16 @@ const TotalSearchChart = () => {
   }, [scoreSearchTweet, summary100PostScore]);
 
   useEffect(() => {
-    setAchirveScore({
-      negativeScore: negativeScore,
-      positiveScore: positiveScore,
-    });
-  }, [scoreSearchTweet]);
+    if (true) {
+      setAchirveScore({
+        negativeScore: negativeScore,
+        positiveScore: positiveScore,
+      });
+    }
+
+  }, [scoreSearchTweet, negativeScore, positiveScore, setAchirveScore]);
 
   const data = [negativeScore, positiveScore, negativePost, positivePost, countNeural];
-  console.log("data", data);
   return (
     <div>
       <Bar

@@ -75,11 +75,17 @@ const loginStyle = {
   },
   appbar: {
     width: "200%",
+    marginLeft: "-1rem",
   },
   noti: {
     width: "200%",
     marginTop: "-8rem",
     marginBottom: "2rem",
+    marginRight: "2rem",
+    marginLeft: "-2rem",
+  },
+  wrapper: {
+    marginRight: "2rem",
   },
 };
 

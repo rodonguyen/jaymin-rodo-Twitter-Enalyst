@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const URL = 'http://localhost:3000/twitter'
+const URL = '/twitter'
 
 export const getSearchTwitter = async (keyword) => {
     try {

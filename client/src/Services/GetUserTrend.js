@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const URL = 'http://localhost:3000/myTrend'
+const URL = '/myTrend'
 
 export const getUserTrendingKeyword = async () => {
     try {

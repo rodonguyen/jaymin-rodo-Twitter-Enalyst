@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const URL = 'http://localhost:3000/googleTrend'
+const URL = '/googleTrend'
 
 export const getTrendingKeyword = async () => {
     try {

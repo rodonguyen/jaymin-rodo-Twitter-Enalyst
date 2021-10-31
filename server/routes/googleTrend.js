@@ -6,12 +6,10 @@ const googleTrends = require('google-trends-api');
 module.exports = router;
 
 const getTrends = async () => {
-    return await googleTrends.realTimeTrends(
-        {
-            geo: "AU",
-            category: "all",
-        }
-    );
+    return await googleTrends.realTimeTrends({
+        geo: "AU",
+        category: "all",
+    });
 }
 //  const trends = JSON.parse(results);
 // trends.storySummaries.trendingStories.forEach((trend) => {
@@ -49,17 +47,13 @@ router.get('/', async (req, res, next) => {
             });
             let uniqueChars = [];
             arr.forEach((c) => {
-                if (!uniqueChars.includes(c)) {
-                    uniqueChars.push(c);
-                }
+                if (!uniqueChars.includes(c))  uniqueChars.push(c);
             });
             res
                 .status(200)
                 .json({ error: false, data: uniqueChars });
         })
         .catch(err => { console.log(err); });
-
-
 });
 
 module.exports = router;

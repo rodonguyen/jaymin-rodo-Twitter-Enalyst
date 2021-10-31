@@ -31,7 +31,7 @@ router.get('/', async (req, res, next) => {
             data.Items.forEach(function (item) {
                 keywords.push(item.keywords);
             });
-            console.log(keywords);
+            // console.log(keywords);
             res
                 .status(200)
                 .json({ error: false, data: keywords });

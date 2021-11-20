@@ -129,6 +129,13 @@ router.get('/', async (req, res) => {
             res
                 .status(200)
                 .json({ error: false, data: dataJSON.result });
+
+            // // For (fast) scaling testing only
+            // const max = 10000;
+            // for (var i = 0; i < max; i++) {
+            //     let dummy = Math.log(i + 1);
+            //     console.log(i, dummy);
+            // }
         }
         else {
             console.log("Persistence ---------> Not found in Redis");

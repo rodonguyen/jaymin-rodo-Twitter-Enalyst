@@ -1,4 +1,5 @@
-# jaymin-rodo-CAB432-project
+# Twitter Enalyst App
+### by Jaymin and Rodo
 
 CAB432 Assignment 2 (Semester 2, 2021)
 

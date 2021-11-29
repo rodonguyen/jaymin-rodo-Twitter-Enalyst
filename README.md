@@ -2,6 +2,7 @@
 
 CAB432 Assignment 2 (Semester 2, 2021)
 
+For detailed information about this project, check out "Specifications-and-Documents/"
 <br>
 
 ---
@@ -27,17 +28,17 @@ CAB432 Assignment 2 (Semester 2, 2021)
 
 | Week 13 | (Starts on 25 Oct)                        |     |
 | ------- | ----------------------------------------- | --- |
-| .       | Finish 80% of the report                  |
-| .       | Project should be done and operational early in this week  |
-| .       | Start to polish app                       |
-| .       | Ask tutor for any last feedback           |
+| x       | Finish 80% of the report                  |
+| x       | Project should be done and operational early in this week  |
+| x       | Start to polish app                       |
+| x       | Ask tutor for any last feedback           |
 
 | Week 14 | (Starts on  1st Nov)              |     |
 | ------- | --------------------------------- | --- |
-| .       | Submit on Monday                  |
-| .       | Do and finish presentation slides |
-| .       | Practice presentation             |
-| .       | Demo                              |
+| x       | Submit on Monday                  |
+| x       | Do and finish presentation slides |
+| x       | Practice presentation             |
+| x       | Demo                              |
 
 
 <br>

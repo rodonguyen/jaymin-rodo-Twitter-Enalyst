@@ -2,7 +2,8 @@
 
 CAB432 Assignment 2 (Semester 2, 2021)
 
-For detailed information about this project, check out "Specifications-and-Documents/"
+For detailed information about this project, check out "Documents/Report.docx"
+
 <br>
 
 ---
